@@ -1,0 +1,17 @@
+## Global
+app.title                               = Check if you can register for VAT
+app.phaseBannerFeedback                 = This is a new service - your <a href="{0}">feedback</a> will help us to improve it.
+app.common.not.applied                  = Not applied
+app.common.applied                      = Applied
+app.common.yes                          = Yes
+app.common.no                           = No
+app.common.continue                     = Continue
+app.common.saveAndContinue              = Save and continue
+app.common.confirmAndContinue           = Confirm and continue
+app.common.errorSummaryLabel            = The following errors were identified on this page.
+app.common.change                       = Change
+app.common.gbp.symbol                   = £
+app.common.back                         = Back
+error.required                          = Select an option
+error.unknown                           = Invalid input
+validation.numeric                      = Enter a numeric value

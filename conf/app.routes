@@ -1,3 +1,30 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.vatregistrationeligibilityfrontend.controllers.HelloWorld.helloWorld
+## SIGN OUT
+GET         /sign-out                                                              controllers.callbacks.SignInOutController.signOut
+
+## POST SIGN IN
+GET         /post-sign-in                                                          controllers.callbacks.SignInOutController.postSignIn
+
+## SERVICE CRITERIA QUESTIONS
+GET         /use-this-service                                                      controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
+GET         /cant-register                                                         controllers.ServiceCriteriaQuestionsController.ineligible()
+
+GET         /national-insurance-number                                             controllers.ServiceCriteriaQuestionsController.show(question = "haveNino")
+POST        /national-insurance-number                                             controllers.ServiceCriteriaQuestionsController.submit(question = "haveNino")
+GET         /international-business                                                controllers.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad")
+POST        /international-business                                                controllers.ServiceCriteriaQuestionsController.submit(question = "doingBusinessAbroad")
+GET         /involved-more-business-changing-status                                controllers.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou")
+POST        /involved-more-business-changing-status                                controllers.ServiceCriteriaQuestionsController.submit(question = "doAnyApplyToYou")
+GET         /agricultural-flat-rate                                                controllers.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf")
+POST        /agricultural-flat-rate                                                controllers.ServiceCriteriaQuestionsController.submit(question = "applyingForAnyOf")
+GET         /apply-for-any                                                         controllers.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf")
+POST        /apply-for-any                                                         controllers.ServiceCriteriaQuestionsController.submit(question = "companyWillDoAnyOf")
+
+## TAXABLE TURNOVER PAGE
+GET         /vat-taxable-sales-over-threshold                                      controllers.TaxableTurnoverController.show
+POST        /vat-taxable-sales-over-threshold                                      controllers.TaxableTurnoverController.submit
+
+## Post incorp threshold question 1
+GET         /gone-over-threshold                                                   controllers.vatTradingDetails.vatChoice.OverThresholdController.show
+POST        /gone-over-threshold                                                   controllers.vatTradingDetails.vatChoice.OverThresholdController.submit
