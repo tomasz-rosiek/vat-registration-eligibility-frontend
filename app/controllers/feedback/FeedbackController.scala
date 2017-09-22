@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package services
+package controllers.feedback
 
-import javax.inject.Singleton
+import javax.inject.Inject
 
-import uk.gov.hmrc.play.http.HeaderCarrier
+import controllers.VatRegistrationController
+import play.api.i18n.MessagesApi
+import play.api.mvc._
+import services.VatRegFrontendService
 
-import scala.concurrent.Future
+class FeedbackController @Inject()(implicit val messagesApi: MessagesApi,
+                                   val vatRegFrontendService: VatRegFrontendService) extends VatRegistrationController {
 
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
+  def show: Action[AnyContent] = authorised(implicit user => implicit request => Ok(vatRegFrontendService.buildVatRegFrontendUrlWelcome))
 
-}
-
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
 }

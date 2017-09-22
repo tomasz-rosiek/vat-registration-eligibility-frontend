@@ -36,6 +36,18 @@ object FormValidation {
     if (StringUtils.isNotBlank(input)) Valid else Invalid(s"validation.$e.missing")
   }
 
+  def textMapping()(implicit e: ErrorCode): Mapping[String] = FieldMapping[String]()(stringFormat("missing")(Seq()))
+
+  /* overrides Play's implicit stringFormatter and handles missing options (e.g. no radio button selected) */
+  private def stringFormat(suffix: String)(args: Seq[Any] = Seq())(implicit e: ErrorCode): Formatter[String] = new Formatter[String] {
+
+    def bind(key: String, data: Map[String, String]) = data.get(key).toRight(
+      Seq(FormError(key, s"validation.$e.$suffix", args))
+    )
+
+    def unbind(key: String, value: String) = Map(key -> value)
+  }
+
   private def booleanFormat()(args: Seq[Any] = Seq())(implicit e: ErrorCode): Formatter[Boolean] = new Formatter[Boolean] {
     def bind(key: String, data: Map[String, String]) = data.get(key).flatMap(input => Try(input.toBoolean).toOption)
       .toRight(Seq(FormError(key, s"validation.$e.missing", args)))

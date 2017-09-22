@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package services
+package models.api
 
-import javax.inject.Singleton
+import java.time.LocalDate
 
-import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.libs.json.Json
 
-import scala.concurrent.Future
+case class VatThresholdPostIncorp(overThresholdSelection: Boolean, overThresholdDate: Option[LocalDate])
 
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
+object VatThresholdPostIncorp {
 
-}
+  implicit val format = Json.format[VatThresholdPostIncorp]
 
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
 }

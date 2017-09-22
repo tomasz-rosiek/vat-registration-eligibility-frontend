@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package services
+package models.api
 
-import javax.inject.Singleton
+import play.api.libs.json.{Json, OFormat}
 
-import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
-
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
-
+case class VatTradingDetails(necessity: String,
+                             reason: Option[String] = None,
+                             vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None) {
+  def registeringVoluntarily: Boolean = necessity == VatTradingDetails.NECESSITY_VOLUNTARY
 }
 
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
+object VatTradingDetails {
+  val NECESSITY_OBLIGATORY = "obligatory"
+  val NECESSITY_VOLUNTARY = "voluntary"
+
+  implicit val format: OFormat[VatTradingDetails] = Json.format[VatTradingDetails]
 }

@@ -1,0 +1,35 @@
+/*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package models.view
+
+import play.api.mvc.Call
+
+case class Summary(sections: Seq[SummarySection])
+
+case class SummarySection(id: String,
+                          //Tuple2[SummaryRow, Boolean] -> row -> boolean indicating whether to render the row or not
+                          rows: Seq[Tuple2[SummaryRow, Boolean]],
+                          display: Boolean = true)
+
+object SummaryRow {
+  def apply(id: String, answerMessageKey: String, changeLink: Option[Call]): SummaryRow = {
+    SummaryRow(id, Seq(answerMessageKey), changeLink)
+  }
+}
+case class SummaryRow(id: String,
+                      answerMessageKeys: Seq[String],
+                      changeLink: Option[Call])

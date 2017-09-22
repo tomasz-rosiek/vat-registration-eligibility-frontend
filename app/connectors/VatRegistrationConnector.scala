@@ -57,6 +57,12 @@ trait VatRegistrationConnect extends FutureInstances {
       case e: Exception => throw logResponse(e, className, "upsertVatEligibility")
     }
 
+  def deleteVatScheme(regId: String)
+                     (implicit hc: HeaderCarrier, rds: HttpReads[Boolean]): Future[Unit] =
+    http.DELETE[Boolean](s"$vatRegUrl/vatreg/$regId/delete-scheme").recover{
+      case e: Exception => throw logResponse(e, className, "deleteVatScheme")
+    } map (_ => ())
+
   def getIncorporationInfo(transactionId: String)(implicit hc: HeaderCarrier): OptionalResponse[IncorporationInfo] =
     OptionT(http.GET[IncorporationInfo](s"$vatRegUrl/vatreg/incorporation-information/$transactionId").map(Some(_)).recover {
       case _ => Option.empty[IncorporationInfo]

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package services
+@(backButtonEnabled: Boolean)(implicit messages: Messages)
 
-import javax.inject.Singleton
-
-import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
-
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
-
+@backButton = {
+    @if(backButtonEnabled) {
+        <div style="width:40%; display: inline-block" align="left" class="form-group-compound">
+            <a id="back" class="back-link" href="javascript:history.back()">@messages("app.common.back")</a>
+        </div>
+    }
 }
 
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
-}
+@backButton
+

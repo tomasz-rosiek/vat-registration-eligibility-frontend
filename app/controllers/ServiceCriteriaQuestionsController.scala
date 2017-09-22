@@ -23,7 +23,7 @@ import connectors.KeystoreConnector
 import forms.ServiceCriteriaFormFactory
 import models.YesOrNoQuestion
 import models.api.VatServiceEligibility
-import models.api.EligibilityQuestion._
+import models.view.EligibilityQuestion._
 import models.view.EligibilityQuestion
 import play.api.data.Form
 import play.api.i18n.MessagesApi
@@ -47,7 +47,7 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
     case DoingBusinessAbroadQuestion => routes.ServiceCriteriaQuestionsController.show(DoAnyApplyToYouQuestion.name)
     case DoAnyApplyToYouQuestion     => routes.ServiceCriteriaQuestionsController.show(ApplyingForAnyOfQuestion.name)
     case ApplyingForAnyOfQuestion    => routes.ServiceCriteriaQuestionsController.show(CompanyWillDoAnyOfQuestion.name)
-    case CompanyWillDoAnyOfQuestion  => controllers.vatTradingDetails.vatChoice.routes.EligibilitySuccessController.show
+    case CompanyWillDoAnyOfQuestion  => routes.EligibilitySuccessController.show
   }
 
   private def viewForQuestion(q: EligibilityQuestion, form: Form[YesOrNoQuestion])(implicit r: Request[AnyContent]) = q match {

@@ -6,8 +6,16 @@ GET         /sign-out                                                           
 ## POST SIGN IN
 GET         /post-sign-in                                                          controllers.callbacks.SignInOutController.postSignIn
 
-## SERVICE CRITERIA QUESTIONS
 GET         /use-this-service                                                      controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
+
+## FEEDBACK
+GET         /feedback                                                              controllers.feedback.FeedbackController.show
+
+## CAN OR CAN'T REGISTER
+GET         /can-register                                                          controllers.EligibilitySuccessController.show
+POST        /can-register                                                          controllers.EligibilitySuccessController.submit
+
+## SERVICE CRITERIA QUESTIONS
 GET         /cant-register                                                         controllers.ServiceCriteriaQuestionsController.ineligible()
 
 GET         /national-insurance-number                                             controllers.ServiceCriteriaQuestionsController.show(question = "haveNino")
@@ -26,5 +34,17 @@ GET         /vat-taxable-sales-over-threshold                                   
 POST        /vat-taxable-sales-over-threshold                                      controllers.TaxableTurnoverController.submit
 
 ## Post incorp threshold question 1
-GET         /gone-over-threshold                                                   controllers.vatTradingDetails.vatChoice.OverThresholdController.show
-POST        /gone-over-threshold                                                   controllers.vatTradingDetails.vatChoice.OverThresholdController.submit
+GET         /gone-over-threshold                                                   controllers.OverThresholdController.show
+POST        /gone-over-threshold                                                   controllers.OverThresholdController.submit
+
+## Threshold summary
+GET         /check-confirm-answers                                                 controllers.ThresholdSummaryController.show
+POST        /check-confirm-answers                                                 controllers.ThresholdSummaryController.submit
+
+## VOLUNTARY REGISTRATION PAGE
+GET         /do-you-want-to-register-voluntarily                                   controllers.VoluntaryRegistrationController.show
+POST        /do-you-want-to-register-voluntarily                                   controllers.VoluntaryRegistrationController.submit
+
+## VOLUNTARY REGISTRATION REASON PAGE
+GET         /reason-for-registering                                                controllers.VoluntaryRegistrationReasonController.show
+POST        /reason-for-registering                                                controllers.VoluntaryRegistrationReasonController.submit

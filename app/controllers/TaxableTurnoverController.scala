@@ -14,104 +14,56 @@
  * limitations under the License.
  */
 
-package models.view.vatTradingDetails.vatChoice {
+package controllers
 
-  import models.api.VatChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
-  import models.api.VatScheme
-  import models.{ApiModelTransformer, S4LTradingDetails, ViewModelFormat}
-  import play.api.libs.json.Json
+import javax.inject.{Inject, Singleton}
 
-  case class TaxableTurnover(yesNo: String)
+import connectors.KeystoreConnector
+import forms.TaxableTurnoverForm
+import models.view.{TaxableTurnover, VoluntaryRegistration}
+import models.view.TaxableTurnover.TAXABLE_YES
+import models.view.VoluntaryRegistration.REGISTER_NO
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{S4LService, VatRegFrontendService, VatRegistrationService}
+import utils.SessionProfile
 
-  object TaxableTurnover {
+import scala.concurrent.Future
 
-    val TAXABLE_YES = "TAXABLE_YES"
-    val TAXABLE_NO = "TAXABLE_NO"
+@Singleton
+class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
+                                          implicit val s4LService: S4LService,
+                                          implicit val vrs: VatRegistrationService,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val vatRegFrontendService: VatRegFrontendService)
+  extends VatRegistrationController with SessionProfile {
 
-    val valid = (item: String) => List(TAXABLE_YES, TAXABLE_NO).contains(item.toUpperCase)
+  import cats.syntax.flatMap._
 
-    implicit val format = Json.format[TaxableTurnover]
+  val form = TaxableTurnoverForm.form
 
-    implicit val viewModelFormat = ViewModelFormat(
-      readF = (group: S4LTradingDetails) => group.taxableTurnover,
-      updateF = (c: TaxableTurnover, g: Option[S4LTradingDetails]) =>
-        g.getOrElse(S4LTradingDetails()).copy(taxableTurnover = Some(c))
-    )
-
-    implicit val modelTransformer = ApiModelTransformer[TaxableTurnover] { (vs: VatScheme) =>
-      vs.tradingDetails.map(_.vatChoice.necessity).collect {
-        case NECESSITY_VOLUNTARY => TaxableTurnover(TAXABLE_NO)
-        case NECESSITY_OBLIGATORY => TaxableTurnover(TAXABLE_YES)
-      }
-    }
+  def show: Action[AnyContent] = authorised.async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { implicit profile =>
+          viewModel[TaxableTurnover]().fold(form)(form.fill)
+            .map(f => Ok(views.html.pages.taxable_turnover(f)))
+        }
   }
-}
 
-package controllers.vatTradingDetails.vatChoice {
-
-  import javax.inject.Inject
-
-  import connectors.KeystoreConnector
-  import controllers.{CommonPlayDependencies, VatRegistrationController}
-  import forms.vatTradingDetails.vatChoice.TaxableTurnoverForm
-  import models.view.vatTradingDetails.vatChoice.StartDateView.COMPANY_REGISTRATION_DATE
-  import models.view.vatTradingDetails.vatChoice.TaxableTurnover.TAXABLE_YES
-  import models.view.vatTradingDetails.vatChoice.VoluntaryRegistration.REGISTER_NO
-  import models.view.vatTradingDetails.vatChoice.{StartDateView, TaxableTurnover, VoluntaryRegistration}
-  import play.api.mvc.{Action, AnyContent}
-  import services.{S4LService, SessionProfile, VatRegistrationService}
-
-  class TaxableTurnoverController @Inject()(ds: CommonPlayDependencies)
-                                           (implicit s4LService: S4LService, vrs: VatRegistrationService)
-    extends VatRegistrationController(ds) with SessionProfile {
-
-    import cats.syntax.flatMap._
-
-    val keystoreConnector: KeystoreConnector = KeystoreConnector
-
-    val form = TaxableTurnoverForm.form
-
-    def show: Action[AnyContent] = authorised.async {
-      implicit user =>
-        implicit request =>
-          withCurrentProfile { implicit profile =>
-            viewModel[TaxableTurnover]().fold(form)(form.fill)
-              .map(f => Ok(features.tradingDetails.views.html.vatChoice.taxable_turnover(f)))
-          }
-    }
-
-    def submit: Action[AnyContent] = authorised.async {
-      implicit user =>
-        implicit request =>
-          withCurrentProfile { implicit profile =>
-            form.bindFromRequest().fold(
-              badForm => BadRequest(features.tradingDetails.views.html.vatChoice.taxable_turnover(badForm)).pure,
-              (data: TaxableTurnover) => save(data).map(_ => data.yesNo == TAXABLE_YES).ifM(
-                for {
-                  _ <- save(VoluntaryRegistration(REGISTER_NO))
-                  _ <- save(StartDateView(COMPANY_REGISTRATION_DATE))
-                } yield controllers.vatLodgingOfficer.routes.CompletionCapacityController.show(),
-                controllers.vatTradingDetails.vatChoice.routes.VoluntaryRegistrationController.show().pure
-              ) map Redirect)
-          }
-    }
-  }
-}
-
-package forms.vatTradingDetails.vatChoice {
-
-  import forms.FormValidation.textMapping
-  import models.view.vatTradingDetails.vatChoice.TaxableTurnover
-  import play.api.data.Form
-  import play.api.data.Forms.mapping
-
-  object TaxableTurnoverForm {
-    val RADIO_YES_NO: String = "taxableTurnoverRadio"
-
-    val form = Form(
-      mapping(
-        RADIO_YES_NO -> textMapping()("taxable.turnover").verifying(TaxableTurnover.valid)
-      )(TaxableTurnover.apply)(TaxableTurnover.unapply)
-    )
+  def submit: Action[AnyContent] = authorised.async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { implicit profile =>
+          form.bindFromRequest().fold(
+            badForm => BadRequest(views.html.pages.taxable_turnover(badForm)).pure,
+            (data: TaxableTurnover) => save(data).map(_ => data.yesNo == TAXABLE_YES).ifM(
+              for {
+                _ <- save(VoluntaryRegistration(REGISTER_NO))
+                //_ <- save(StartDateView(COMPANY_REGISTRATION_DATE)) //TODO: call S4LService to save StartDateView
+              } yield vatRegFrontendService.buildVatRegFrontendUrlEntry,
+              Future.successful(routes.VoluntaryRegistrationController.show.url)
+            ) map (Redirect(_)))
+        }
   }
 }

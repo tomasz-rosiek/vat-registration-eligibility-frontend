@@ -24,9 +24,8 @@ import cats.instances.FutureInstances
 import cats.syntax.ApplicativeSyntax
 import config.FrontendAuthConnector
 import models.{CurrentProfile, S4LKey, S4LModelTransformer, ViewModelFormat}
-import play.api.Configuration
 import play.api.data.{Form, FormError}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.libs.json.Format
 import services.{S4LService, VatRegistrationService}
 import uk.gov.hmrc.http.cache.client.CacheMap

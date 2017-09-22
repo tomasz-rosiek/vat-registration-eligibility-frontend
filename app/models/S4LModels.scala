@@ -16,10 +16,12 @@
 
 package models
 
-import models.api.{VatScheme, VatServiceEligibility}
+import models.api.{VatScheme, VatServiceEligibility, VatThresholdPostIncorp, VatTradingDetails}
 import play.api.libs.json.{Json, OFormat}
 import common.ErrorUtil.fail
-import models.view.vatTradingDetails.vatChoice.TaxableTurnover
+import models.view.{TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason, OverThresholdView}
+import models.view.VoluntaryRegistration.REGISTER_YES
+import models.api.VatTradingDetails.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 
 trait S4LModelTransformer[C] {
   // Returns an S4L container for a logical group given a VatScheme
@@ -59,17 +61,10 @@ object S4LVatEligibility {
   }
 }
 
-final case class S4LTradingDetails
-(
-  taxableTurnover: Option[TaxableTurnover] = None,
-  tradingName: Option[TradingNameView] = None,
-  startDate: Option[StartDateView] = None,
-  voluntaryRegistration: Option[VoluntaryRegistration] = None,
-  voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
-  euGoods: Option[EuGoods] = None,
-  applyEori: Option[ApplyEori] = None,
-  overThreshold: Option[OverThresholdView] = None
-)
+case class S4LTradingDetails(taxableTurnover: Option[TaxableTurnover] = None,
+                             voluntaryRegistration: Option[VoluntaryRegistration] = None,
+                             voluntaryRegistrationReason: Option[VoluntaryRegistrationReason] = None,
+                             overThreshold: Option[OverThresholdView] = None)
 
 object S4LTradingDetails {
   implicit val format: OFormat[S4LTradingDetails] = Json.format[S4LTradingDetails]
@@ -80,12 +75,6 @@ object S4LTradingDetails {
     override def toS4LModel(vs: VatScheme): S4LTradingDetails =
       S4LTradingDetails(
         taxableTurnover = ApiModelTransformer[TaxableTurnover].toViewModel(vs),
-        tradingName = ApiModelTransformer[TradingNameView].toViewModel(vs),
-        startDate = ApiModelTransformer[StartDateView].toViewModel(vs),
-        voluntaryRegistration = ApiModelTransformer[VoluntaryRegistration].toViewModel(vs),
-        voluntaryRegistrationReason = ApiModelTransformer[VoluntaryRegistrationReason].toViewModel(vs),
-        euGoods = ApiModelTransformer[EuGoods].toViewModel(vs),
-        applyEori = ApiModelTransformer[ApplyEori].toViewModel(vs),
         overThreshold = ApiModelTransformer[OverThresholdView].toViewModel(vs)
       )
   }
@@ -96,27 +85,14 @@ object S4LTradingDetails {
     // map S4LTradingDetails to VatTradingDetails
     override def toApi(c: S4LTradingDetails): VatTradingDetails =
       VatTradingDetails(
-        vatChoice = VatChoice(
-          necessity = c.voluntaryRegistration.map(vr =>
-            if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
-          vatStartDate = c.startDate.map(sd => VatStartDate(
-            selection = sd.dateType,
-            startDate = if (sd.dateType == BUSINESS_START_DATE) sd.ctActiveDate else sd.date)
-          ).getOrElse(error),
-          reason = c.voluntaryRegistrationReason.map(_.reason),
-          vatThresholdPostIncorp = c.overThreshold.map(vtp =>
-            VatThresholdPostIncorp(
-              overThresholdSelection = vtp.selection,
-              overThresholdDate = vtp.date
-            )
-          )),
-
-        tradingName = c.tradingName.map(tnv =>
-          TradingName(tnv.yesNo == TRADING_NAME_YES, tnv.tradingName)).getOrElse(error),
-
-        euTrading = VatEuTrading(
-          selection = c.euGoods.map(_.yesNo == EU_GOODS_YES).getOrElse(error),
-          eoriApplication = c.applyEori.map(_.yesNo)
+        necessity = c.voluntaryRegistration.map(vr =>
+          if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
+        reason = c.voluntaryRegistrationReason.map(_.reason),
+        vatThresholdPostIncorp = c.overThreshold.map(vtp =>
+          VatThresholdPostIncorp(
+            overThresholdSelection = vtp.selection,
+            overThresholdDate = vtp.date
+          )
         )
       )
   }

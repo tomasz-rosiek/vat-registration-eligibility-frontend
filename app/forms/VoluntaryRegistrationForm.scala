@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package services
+package forms
 
-import javax.inject.Singleton
+import forms.FormValidation.textMapping
+import models.view.VoluntaryRegistration
+import play.api.data.Form
+import play.api.data.Forms.mapping
 
-import uk.gov.hmrc.play.http.HeaderCarrier
+object VoluntaryRegistrationForm {
+  val RADIO_YES_NO: String = "voluntaryRegistrationRadio"
 
-import scala.concurrent.Future
-
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
-
-}
-
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
+  val form = Form(
+    mapping(
+      RADIO_YES_NO -> textMapping()("voluntary.registration").verifying(VoluntaryRegistration.valid)
+    )(VoluntaryRegistration.apply)(VoluntaryRegistration.unapply)
+  )
 }

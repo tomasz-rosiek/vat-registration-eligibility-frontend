@@ -19,20 +19,22 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import cats.syntax.FlatMapSyntax
+import connectors.KeystoreConnector
 import forms.OverThresholdFormFactory
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.OverThreshold
+import models.view.OverThresholdView
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
 import utils.SessionProfile
 
 @Singleton
-class OverThresholdController @Inject()(val formFactory: OverThresholdFormFactory,
-                                        val incorpInfoService: IncorpInfoService,
-                                        implicit val messagesApi: MessagesApi,
+class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
                                         implicit val s4LService: S4LService,
-                                        implicit val vrs: VatRegistrationService)
+                                        implicit val vrs: VatRegistrationService,
+                                        val keystoreConnector: KeystoreConnector,
+                                        val formFactory: OverThresholdFormFactory,
+                                        val incorpInfoService: IncorpInfoService)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {
 
   def show: Action[AnyContent] = authorised.async {
@@ -42,7 +44,7 @@ class OverThresholdController @Inject()(val formFactory: OverThresholdFormFactor
           val dateOfIncorporation = profile.incorporationDate
             .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
 
-          viewModel[OverThreshold]().fold(formFactory.form(dateOfIncorporation))(formFactory.form(dateOfIncorporation).fill) map {
+          viewModel[OverThresholdView]().fold(formFactory.form(dateOfIncorporation))(formFactory.form(dateOfIncorporation).fill) map {
             form => Ok(views.html.pages.over_threshold(form, dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))
           }
         }
@@ -55,8 +57,8 @@ class OverThresholdController @Inject()(val formFactory: OverThresholdFormFactor
         withCurrentProfile { implicit profile =>
           incorpInfoService.fetchDateOfIncorporation().flatMap(date =>
             formFactory.form(date).bindFromRequest().fold(badForm =>
-              BadRequest(features.tradingDetails.views.html.vatChoice.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y))).pure,
-              data => save(data).map(_ => Redirect(controllers.vatTradingDetails.vatChoice.routes.ThresholdSummaryController.show()))
+              BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y))).pure,
+              data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
             )
           )
         }

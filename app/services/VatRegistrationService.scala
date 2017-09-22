@@ -43,6 +43,9 @@ trait VatRegistrationSrv {
   def getVatScheme()(implicit profile: CurrentProfile, hc: HeaderCarrier): Future[VatScheme] =
     vatRegConnector.getRegistration(profile.registrationId)
 
+  def deleteVatScheme()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Unit] =
+    vatRegConnector.deleteVatScheme(profile.registrationId)
+
   def submitVatEligibility()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[VatServiceEligibility] = {
     def merge(fresh: Option[S4LVatEligibility], vs: VatScheme): VatServiceEligibility =
       fresh.fold(

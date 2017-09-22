@@ -16,7 +16,7 @@
 
 @import java.time.format.DateTimeFormatter
 
-@import models.view.vatTradingDetails.vatChoice.OverThresholdView
+@import models.view.OverThresholdView
 @(overThresholdForm: Form[OverThresholdView], dateOfIncorporation: String)(implicit request: Request[_], messages: Messages)
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
@@ -39,7 +39,7 @@
 
         <p>@messages("pages.thresholdQuestion1.p1")</p>
 
-        @govHelpers.form(action = controllers.vatTradingDetails.vatChoice.routes.OverThresholdController.submit()) {
+        @govHelpers.form(action = controllers.routes.OverThresholdController.submit()) {
             <div class="form-group">
                 <fieldset class="inline">
                 @defining(DateTimeFormatter

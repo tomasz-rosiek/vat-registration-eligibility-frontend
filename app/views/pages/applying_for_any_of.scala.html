@@ -33,7 +33,7 @@
         <p>@messages("pages.eligibility.applyingForAnyOf.p1")</p>
         <p>@messages("pages.eligibility.applyingForAnyOf.p2")</p>
 
-        @govHelpers.form(action = controllers.vatEligibility.routes.ServiceCriteriaQuestionsController.submit("applyingForAnyOf")) {
+        @govHelpers.form(action = controllers.routes.ServiceCriteriaQuestionsController.submit("applyingForAnyOf")) {
             <div class="form-group">
                 <fieldset class="inline">
                     <span id="applyingForAnyOfRadio"/>

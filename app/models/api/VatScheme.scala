@@ -20,17 +20,14 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 
-case class VatScheme(
-                      id: String,
-                      vatServiceEligibility: Option[VatServiceEligibility] = None
-                    )
+case class VatScheme(id: String,
+                     tradingDetails: Option[VatTradingDetails] = None,
+                     vatServiceEligibility: Option[VatServiceEligibility] = None)
 
 object VatScheme {
-
   implicit val format: OFormat[VatScheme] = (
     (__ \ "registrationId").format[String] and
-      (__ \ "vatEligibility").formatNullable[VatServiceEligibility]
-
-    ) (VatScheme.apply, unlift(VatScheme.unapply))
-
+    (__ \ "tradingDetails" \ "vatChoice").formatNullable[VatTradingDetails] and
+    (__ \ "vatEligibility").formatNullable[VatServiceEligibility]
+  )(VatScheme.apply, unlift(VatScheme.unapply))
 }

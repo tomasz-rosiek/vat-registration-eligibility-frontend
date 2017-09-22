@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package services
+@(phaseId: String)(implicit messages: Messages)
 
-import javax.inject.Singleton
-
-import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
-
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
-
-}
-
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/"
-}
+<div class="phase-banner">
+    <p>
+        <strong id="phase" class="phase-tag">@phaseId</strong>
+        <span>@Html(messages("app.phaseBannerFeedback", controllers.feedback.routes.FeedbackController.show))</span>
+    </p>
+</div>

@@ -20,17 +20,16 @@ import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import cats.data.OptionT
-import connectors.{KeystoreConnect, KeystoreConnector}
+import cats.instances.future._
+import connectors.KeystoreConnector
 import models.external.IncorporationInfo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class IncorpInfoService @Inject()(val keystoreConnector: KeystoreConnector) extends IncorpInfoSrv
-
-trait IncorpInfoSrv {
-  val keystoreConnector: KeystoreConnect
+class IncorpInfoService @Inject()(val keystoreConnector: KeystoreConnector) {
 
   def fetchDateOfIncorporation()(implicit hc: HeaderCarrier): Future[LocalDate] = {
     OptionT(keystoreConnector.fetchAndGet[IncorporationInfo]("incorporationStatus"))

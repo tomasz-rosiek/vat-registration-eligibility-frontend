@@ -24,7 +24,7 @@ import forms.FormValidation.Dates.{nonEmptyMonthYearModel, validPartialMonthYear
 import forms.FormValidation.{inRangeWithArgs, missingBooleanFieldMappingArgs}
 import models.MonthYearModel
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
-import models.view.OverThreshold
+import models.view.OverThresholdView
 import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
@@ -38,7 +38,7 @@ class OverThresholdFormFactory @Inject()(today: Now[LocalDate]) {
 
   val RADIO_YES_NO = "overThresholdRadio"
 
-  def form(dateOfIncorporation: LocalDate): Form[OverThreshold] = {
+  def form(dateOfIncorporation: LocalDate): Form[OverThresholdView] = {
 
     val minDate: LocalDate = dateOfIncorporation
     val maxDate: LocalDate = LocalDate.now()
@@ -55,7 +55,7 @@ class OverThresholdFormFactory @Inject()(today: Now[LocalDate]) {
           )(MonthYearModel.apply)(MonthYearModel.unapply).verifying(
             nonEmptyMonthYearModel(validPartialMonthYearModel(inRangeWithArgs(minDate, maxDate)(Seq(dateOfIncorporation.format(FORMAT_DD_MMMM_Y))))))
         )
-      )(OverThreshold.bind)(OverThreshold.unbind)
+      )(OverThresholdView.bind)(OverThresholdView.unbind)
     )
   }
 }
