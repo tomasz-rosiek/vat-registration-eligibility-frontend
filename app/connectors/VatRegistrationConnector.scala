@@ -16,8 +16,6 @@
 
 package connectors
 
-package connectors
-
 import javax.inject.Singleton
 
 import cats.data.OptionT

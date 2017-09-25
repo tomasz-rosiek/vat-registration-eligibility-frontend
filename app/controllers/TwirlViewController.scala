@@ -18,16 +18,17 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.KeystoreConnector
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
+import services.CurrentProfileService
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
 @Singleton
 class TwirlViewController @Inject()(implicit val messagesApi: MessagesApi,
-                                    val keystoreConnector: KeystoreConnector) extends VatRegistrationController with SessionProfile {
+                                    val currentProfileService: CurrentProfileService)
+  extends VatRegistrationController with SessionProfile {
 
   def renderViewAuthorised(viewName: String): Action[AnyContent] = authorised.async {
     implicit user =>

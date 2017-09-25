@@ -18,14 +18,13 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.KeystoreConnector
 import forms.TaxableTurnoverForm
 import models.view.{TaxableTurnover, VoluntaryRegistration}
 import models.view.TaxableTurnover.TAXABLE_YES
 import models.view.VoluntaryRegistration.REGISTER_NO
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
 
 import scala.concurrent.Future
@@ -34,7 +33,7 @@ import scala.concurrent.Future
 class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
                                           implicit val s4LService: S4LService,
                                           implicit val vrs: VatRegistrationService,
-                                          val keystoreConnector: KeystoreConnector,
+                                          val currentProfileService: CurrentProfileService,
                                           val vatRegFrontendService: VatRegFrontendService)
   extends VatRegistrationController with SessionProfile {
 

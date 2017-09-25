@@ -18,18 +18,17 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.KeystoreConnector
 import org.apache.commons.lang3.StringUtils
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.IncorpInfoService
+import services.{CurrentProfileService, IncorpInfoService}
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
 @Singleton
 class EligibilitySuccessController @Inject()(implicit val messagesApi: MessagesApi,
-                                             val keystoreConnector: KeystoreConnector,
+                                             val currentProfileService: CurrentProfileService,
                                              val incorpInfoService: IncorpInfoService)
   extends VatRegistrationController with SessionProfile {
 

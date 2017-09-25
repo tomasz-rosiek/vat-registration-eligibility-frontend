@@ -19,7 +19,6 @@ package forms
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
-import common.Now
 import forms.FormValidation.Dates.{nonEmptyMonthYearModel, validPartialMonthYearModel}
 import forms.FormValidation.{inRangeWithArgs, missingBooleanFieldMappingArgs}
 import models.MonthYearModel
@@ -30,7 +29,7 @@ import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
 @Singleton
-class OverThresholdFormFactory @Inject()(today: Now[LocalDate]) {
+class OverThresholdFormFactory @Inject()() {
 
   implicit object LocalDateOrdering extends Ordering[LocalDate] {
     override def compare(x: LocalDate, y: LocalDate): Int = x.compareTo(y)

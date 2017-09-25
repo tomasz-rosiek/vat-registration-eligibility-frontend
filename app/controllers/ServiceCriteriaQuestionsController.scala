@@ -28,12 +28,13 @@ import models.view.EligibilityQuestion
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Call, Request}
-import services.{S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
 
 @Singleton
 class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaFormFactory,
                                                    val keystoreConnector: KeystoreConnector,
+                                                   val currentProfileService: CurrentProfileService,
                                                    val vatRegFrontendService: VatRegFrontendService,
                                                    implicit val messagesApi: MessagesApi,
                                                    implicit val vrs: VatRegistrationService,

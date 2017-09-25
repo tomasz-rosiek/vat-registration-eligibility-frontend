@@ -19,7 +19,6 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import cats.syntax.FlatMapSyntax
-import connectors.KeystoreConnector
 import forms.OverThresholdFormFactory
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
 import models.view.OverThresholdView
@@ -32,7 +31,7 @@ import utils.SessionProfile
 class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
                                         implicit val s4LService: S4LService,
                                         implicit val vrs: VatRegistrationService,
-                                        val keystoreConnector: KeystoreConnector,
+                                        val currentProfileService: CurrentProfileService,
                                         val formFactory: OverThresholdFormFactory,
                                         val incorpInfoService: IncorpInfoService)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {

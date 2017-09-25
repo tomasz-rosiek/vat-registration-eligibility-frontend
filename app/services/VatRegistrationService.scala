@@ -19,9 +19,10 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import common.ErrorUtil.fail
-import connectors.connectors.VatRegistrationConnector
+import connectors.{OptionalResponse, VatRegistrationConnector}
 import models._
 import models.api._
+import models.external.IncorporationInfo
 import play.api.libs.json.Format
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -30,12 +31,7 @@ import scala.concurrent.Future
 
 @Singleton
 class VatRegistrationService @Inject()(val s4LService: S4LService,
-                                       val vatRegConnector: VatRegistrationConnector) extends VatRegistrationSrv
-
-trait VatRegistrationSrv {
-
-  val s4LService: S4LSrv
-  val vatRegConnector: VatRegistrationConnector
+                                       val vatRegConnector: VatRegistrationConnector) {
 
   private[services] def s4l[T: Format : S4LKey]()(implicit hc: HeaderCarrier, profile: CurrentProfile) =
     s4LService.fetchAndGet[T]()
@@ -58,4 +54,7 @@ trait VatRegistrationSrv {
       response <- vatRegConnector.upsertVatEligibility(profile.registrationId, merge(ve, vs))
     } yield response
   }
+
+  def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): OptionalResponse[IncorporationInfo] =
+    vatRegConnector.getIncorporationInfo(txId)
 }

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package utils
+@(welcomeUrl: String)(implicit request: Request[_], messages: Messages)
 
-import models.CurrentProfile
-import play.api.mvc.{Request, Result}
-import services.CurrentProfileService
-import uk.gov.hmrc.play.http.HeaderCarrier
+@main_template(title = messages("errorPages.title")) {
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+    <h1>@messages("errorPages.restart.heading")</h1>
 
-trait SessionProfile {
-  val currentProfileService: CurrentProfileService
+    <p>@Html(messages("errorPages.restart.p1", welcomeUrl))</p>
 
-  def withCurrentProfile(f: CurrentProfile => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-    currentProfileService.getCurrentProfile flatMap f
-  }
 }

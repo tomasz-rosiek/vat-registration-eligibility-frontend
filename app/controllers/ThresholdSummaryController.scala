@@ -26,7 +26,7 @@ import models.view.VoluntaryRegistration.REGISTER_NO
 import models.{CurrentProfile, MonthYearModel, S4LTradingDetails}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.SessionProfile
 
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi,
                                            implicit val s4LService: S4LService,
                                            implicit val vrs: VatRegistrationService,
-                                           val keystoreConnector: KeystoreConnector,
+                                           val currentProfileService: CurrentProfileService,
                                            val vatRegFrontendService: VatRegFrontendService)
   extends VatRegistrationController with SessionProfile {
 

@@ -18,19 +18,18 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.KeystoreConnector
 import forms.VoluntaryRegistrationReasonForm
 import models.view.VoluntaryRegistrationReason
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRegistrationService}
 import utils.SessionProfile
 
 @Singleton
 class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: MessagesApi,
                                                       implicit val s4l: S4LService,
                                                       implicit val vrs: VatRegistrationService,
-                                                      val keystoreConnector: KeystoreConnector,
+                                                      val currentProfileService: CurrentProfileService,
                                                       val vatRegFrontendService: VatRegFrontendService)
   extends VatRegistrationController with SessionProfile {
 

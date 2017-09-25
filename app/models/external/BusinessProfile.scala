@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package utils
+package models.external
 
-import models.CurrentProfile
-import play.api.mvc.{Request, Result}
-import services.CurrentProfileService
-import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.libs.json.{Json, _}
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+case class BusinessProfile(registrationID: String,
+                           language: String)
 
-trait SessionProfile {
-  val currentProfileService: CurrentProfileService
+object BusinessProfile {
+  implicit val formats = Json.format[BusinessProfile]
+}
 
-  def withCurrentProfile(f: CurrentProfile => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-    currentProfileService.getCurrentProfile flatMap f
-  }
+case class CompanyRegistrationProfile(status: String,
+                                      transactionId: String)
+
+object CompanyRegistrationProfile {
+  implicit val formats = Json.format[CompanyRegistrationProfile]
 }
