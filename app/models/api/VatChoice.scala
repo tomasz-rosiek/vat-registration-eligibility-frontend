@@ -16,18 +16,17 @@
 
 package models.api
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Json, OFormat}
 
+case class VatChoice(necessity: String, // "obligatory" or "voluntary"
+                     reason: Option[String] = None,
+                     vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None)
 
-case class VatScheme(id: String,
-                     tradingDetails: Option[VatTradingDetails] = None,
-                     vatServiceEligibility: Option[VatServiceEligibility] = None)
+object VatChoice {
 
-object VatScheme {
-  implicit val format: OFormat[VatScheme] = (
-    (__ \ "registrationId").format[String] and
-    (__ \ "tradingDetails").formatNullable[VatTradingDetails] and
-    (__ \ "vatEligibility").formatNullable[VatServiceEligibility]
-  )(VatScheme.apply, unlift(VatScheme.unapply))
+  val NECESSITY_OBLIGATORY = "obligatory"
+  val NECESSITY_VOLUNTARY = "voluntary"
+
+  implicit val format: OFormat[VatChoice] = Json.format[VatChoice]
+
 }

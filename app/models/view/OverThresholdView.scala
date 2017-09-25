@@ -48,7 +48,7 @@ object OverThresholdView {
 
   // Returns a view model for a specific part of a given VatScheme API model
   implicit val modelTransformer = ApiModelTransformer[OverThresholdView] { vs: VatScheme =>
-    vs.tradingDetails.map(_.vatThresholdPostIncorp).collect {
+    vs.tradingDetails.map(_.vatChoice.vatThresholdPostIncorp).collect {
       case Some(VatThresholdPostIncorp(selection, d@_)) => OverThresholdView(selection, d)
     }
   }

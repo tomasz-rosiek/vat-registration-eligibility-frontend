@@ -16,12 +16,12 @@
 
 package models
 
-import models.api.{VatScheme, VatServiceEligibility, VatThresholdPostIncorp, VatTradingDetails}
+import models.api.{VatChoice, VatScheme, VatServiceEligibility, VatThresholdPostIncorp, VatTradingDetails}
 import play.api.libs.json.{Json, OFormat}
 import common.ErrorUtil.fail
-import models.view.{TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason, OverThresholdView}
+import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
 import models.view.VoluntaryRegistration.REGISTER_YES
-import models.api.VatTradingDetails.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
+import models.api.VatChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 
 trait S4LModelTransformer[C] {
   // Returns an S4L container for a logical group given a VatScheme
@@ -85,13 +85,15 @@ object S4LTradingDetails {
     // map S4LTradingDetails to VatTradingDetails
     override def toApi(c: S4LTradingDetails): VatTradingDetails =
       VatTradingDetails(
-        necessity = c.voluntaryRegistration.map(vr =>
-          if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
-        reason = c.voluntaryRegistrationReason.map(_.reason),
-        vatThresholdPostIncorp = c.overThreshold.map(vtp =>
-          VatThresholdPostIncorp(
-            overThresholdSelection = vtp.selection,
-            overThresholdDate = vtp.date
+        VatChoice(
+          necessity = c.voluntaryRegistration.map(vr =>
+            if (vr.yesNo == REGISTER_YES) NECESSITY_VOLUNTARY else NECESSITY_OBLIGATORY).getOrElse(NECESSITY_OBLIGATORY),
+          reason = c.voluntaryRegistrationReason.map(_.reason),
+          vatThresholdPostIncorp = c.overThreshold.map(vtp =>
+            VatThresholdPostIncorp(
+              overThresholdSelection = vtp.selection,
+              overThresholdDate = vtp.date
+            )
           )
         )
       )

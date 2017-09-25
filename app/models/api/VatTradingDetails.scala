@@ -17,16 +17,12 @@
 package models.api
 
 import play.api.libs.json.{Json, OFormat}
+import models.api.VatChoice.NECESSITY_VOLUNTARY
 
-case class VatTradingDetails(necessity: String,
-                             reason: Option[String] = None,
-                             vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None) {
-  def registeringVoluntarily: Boolean = necessity == VatTradingDetails.NECESSITY_VOLUNTARY
+case class VatTradingDetails(vatChoice: VatChoice) {
+  def registeringVoluntarily: Boolean = vatChoice.necessity == NECESSITY_VOLUNTARY
 }
 
 object VatTradingDetails {
-  val NECESSITY_OBLIGATORY = "obligatory"
-  val NECESSITY_VOLUNTARY = "voluntary"
-
   implicit val format: OFormat[VatTradingDetails] = Json.format[VatTradingDetails]
 }

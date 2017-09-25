@@ -16,7 +16,7 @@
 
 package models.view
 
-import models.api.VatTradingDetails.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
+import models.api.VatChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
 import models.api.VatScheme
 import models.{ApiModelTransformer, S4LTradingDetails, ViewModelFormat}
 import play.api.libs.json.Json
@@ -39,7 +39,7 @@ object TaxableTurnover {
   )
 
   implicit val modelTransformer = ApiModelTransformer[TaxableTurnover] { (vs: VatScheme) =>
-    vs.tradingDetails.map(_.necessity).collect {
+    vs.tradingDetails.map(_.vatChoice.necessity).collect {
       case NECESSITY_VOLUNTARY => TaxableTurnover(TAXABLE_NO)
       case NECESSITY_OBLIGATORY => TaxableTurnover(TAXABLE_YES)
     }
