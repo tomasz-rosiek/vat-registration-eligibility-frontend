@@ -19,7 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import cats.data.OptionT
-import connectors.{KeystoreConnect, KeystoreConnector, OptionalResponse, S4LConnect, S4LConnector}
+import connectors.{OptionalResponse, S4LConnect, S4LConnector}
 import models.{CurrentProfile, S4LKey, ViewModelFormat}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap

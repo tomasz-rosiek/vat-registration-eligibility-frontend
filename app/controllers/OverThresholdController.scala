@@ -31,8 +31,7 @@ import utils.SessionProfile
 class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
                                         implicit val s4LService: S4LService,
                                         implicit val vrs: VatRegistrationService,
-                                        val currentProfileService: CurrentProfileService,
-                                        val formFactory: OverThresholdFormFactory)
+                                        val currentProfileService: CurrentProfileService)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {
 
   def show: Action[AnyContent] = authorised.async {
@@ -42,7 +41,7 @@ class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
           val dateOfIncorporation = profile.incorporationDate
             .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
 
-          viewModel[OverThresholdView]().fold(formFactory.form(dateOfIncorporation))(formFactory.form(dateOfIncorporation).fill) map {
+          viewModel[OverThresholdView]().fold(OverThresholdFormFactory.form(dateOfIncorporation))(OverThresholdFormFactory.form(dateOfIncorporation).fill) map {
             form => Ok(views.html.pages.over_threshold(form, dateOfIncorporation.format(FORMAT_DD_MMMM_Y)))
           }
         }
@@ -56,7 +55,7 @@ class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
           val dateOfIncorporation = profile.incorporationDate
             .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
 
-          formFactory.form(dateOfIncorporation).bindFromRequest().fold(
+          OverThresholdFormFactory.form(dateOfIncorporation).bindFromRequest().fold(
             badForm => BadRequest(views.html.pages.over_threshold(badForm, dateOfIncorporation.format(FORMAT_DD_MMMM_Y))).pure,
             data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
           )

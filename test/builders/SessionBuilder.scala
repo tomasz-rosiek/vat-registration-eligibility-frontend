@@ -38,5 +38,10 @@ trait SessionBuilder {
       SessionKeys.token -> "RANDOMTOKEN",
       SessionKeys.userId -> userId)
 
+  def updateRequestWithSession(fakeRequest: FakeRequest[AnyContentAsEmpty.type], userId: String): FakeRequest[AnyContentAsEmpty.type] =
+    fakeRequest.withSession(
+      SessionKeys.sessionId -> s"session-${UUID.randomUUID}",
+      SessionKeys.token -> "RANDOMTOKEN",
+      SessionKeys.userId -> userId)
 }
 

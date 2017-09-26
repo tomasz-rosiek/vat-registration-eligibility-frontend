@@ -18,7 +18,8 @@ package mocks
 
 import connectors.{CompanyRegistrationConnector, IncorporationInformationConnector, VatRegistrationConnector}
 import org.scalatest.mockito.MockitoSugar
-import services.{CurrentProfileService, IncorpInfoService, S4LService, VatRegistrationService}
+import play.api.i18n.MessagesApi
+import services.{CurrentProfileService, IncorpInfoService, S4LService, VatRegFrontendService, VatRegistrationService}
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
@@ -29,6 +30,7 @@ trait VatMocks
     with WSHTTPMock {
 
   this: MockitoSugar =>
+  implicit lazy val mockMessagesApi = mock[MessagesApi]
   implicit lazy val mockAuthConnector = mock[AuthConnector]
   implicit lazy val mockSessionCache = mock[SessionCache]
   implicit lazy val mockAudit = mock[Audit]
@@ -39,5 +41,5 @@ trait VatMocks
   implicit lazy val mockIIConnector = mock[IncorporationInformationConnector]
   implicit lazy val mockVatRegistrationService = mock[VatRegistrationService]
   implicit lazy val mockIncorpInfoService = mock[IncorpInfoService]
-
+  implicit lazy val mockVatRegFrontendService = mock[VatRegFrontendService]
 }

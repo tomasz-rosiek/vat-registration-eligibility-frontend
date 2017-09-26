@@ -18,7 +18,6 @@ package controllers
 
 import javax.inject.Inject
 
-import connectors.KeystoreConnector
 import controllers.builders.SummaryVatThresholdBuilder
 import models.api.VatThresholdPostIncorp
 import models.view.{Summary, VoluntaryRegistration}

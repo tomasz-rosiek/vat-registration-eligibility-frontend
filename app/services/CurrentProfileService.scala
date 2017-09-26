@@ -16,10 +16,8 @@
 
 package services
 
-import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
-import cats.data.OptionT
 import common.enums.VatRegStatus
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import models.CurrentProfile

@@ -16,13 +16,9 @@
 
 package services
 
-import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
-import cats.data.OptionT
-import cats.instances.future._
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
-import models.external.IncorporationInfo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -30,8 +26,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class IncorpInfoService @Inject()(val keystoreConnector: KeystoreConnector,
-                                  val iiConnector: IncorporationInformationConnector) {
+                                  val incorpInfoConnector: IncorporationInformationConnector) {
 
   def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] =
-    iiConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
+    incorpInfoConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
 }

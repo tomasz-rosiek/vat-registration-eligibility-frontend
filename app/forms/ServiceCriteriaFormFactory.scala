@@ -21,7 +21,7 @@ import models.YesOrNoQuestion
 import play.api.data.Form
 import play.api.data.Forms._
 
-class ServiceCriteriaFormFactory {
+object ServiceCriteriaFormFactory {
 
   def form(question: String): Form[YesOrNoQuestion] = {
     val RADIO_YES_NO: String = s"${question}Radio"

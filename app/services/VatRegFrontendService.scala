@@ -18,16 +18,13 @@ package services
 
 import javax.inject.Singleton
 
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
-
 @Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
+class VatRegFrontendService extends ServicesConfig {
+  val vatRegFrontendUrl: String = getConfString("vat-registration-frontend.www.url", "")
 
-}
-
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat"
+  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = s"$vatRegFrontendUrl/who-is-registering-the-company-for-vat"
+  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = vatRegFrontendUrl
 }

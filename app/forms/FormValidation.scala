@@ -60,6 +60,9 @@ object FormValidation {
   def missingBooleanFieldMapping()(implicit e: ErrorCode): Mapping[Boolean] =
     FieldMapping[Boolean]()(booleanFormat()(Seq()))
 
+  def inRange[T](minValue: T, maxValue: T)(implicit ordering: Ordering[T], e: ErrorCode): Constraint[T] =
+    inRangeWithArgs[T](minValue, maxValue)(Seq())(ordering, e)
+
   def inRangeWithArgs[T](minValue: T, maxValue: T)(args: Seq[Any] = Seq())(implicit ordering: Ordering[T], e: ErrorCode): Constraint[T] =
     Constraint[T] { (t: T) =>
       Logger.info(s"Checking constraint for value $t in the range of [$minValue, $maxValue]")

@@ -32,8 +32,7 @@ import services.{CurrentProfileService, S4LService, VatRegFrontendService, VatRe
 import utils.SessionProfile
 
 @Singleton
-class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaFormFactory,
-                                                   val keystoreConnector: KeystoreConnector,
+class ServiceCriteriaQuestionsController @Inject()(val keystoreConnector: KeystoreConnector,
                                                    val currentProfileService: CurrentProfileService,
                                                    val vatRegFrontendService: VatRegFrontendService,
                                                    implicit val messagesApi: MessagesApi,
@@ -64,7 +63,7 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
       implicit request =>
         withCurrentProfile { implicit profile =>
           val question = EligibilityQuestion(q)
-          val form: Form[YesOrNoQuestion] = formFactory.form(question.name)
+          val form: Form[YesOrNoQuestion] = ServiceCriteriaFormFactory.form(question.name)
           viewModel[VatServiceEligibility]()
             .flatMap(e => OptionT.fromOption(e.getAnswer(question)))
             .fold(form)(answer => form.fill(YesOrNoQuestion(question.name, answer)))
@@ -78,7 +77,7 @@ class ServiceCriteriaQuestionsController @Inject()(formFactory: ServiceCriteriaF
         withCurrentProfile { implicit profile =>
           val question = EligibilityQuestion(q)
           import common.ConditionalFlatMap._
-          formFactory.form(question.name).bindFromRequest().fold(
+          ServiceCriteriaFormFactory.form(question.name).bindFromRequest().fold(
             badForm => BadRequest(viewForQuestion(question, badForm)).pure,
             data => for {
               vatEligibility <- viewModel[VatServiceEligibility]().getOrElse(VatServiceEligibility())

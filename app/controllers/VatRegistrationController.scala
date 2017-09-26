@@ -16,8 +16,6 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
 import auth.VatTaxRegime
 import cats.data.OptionT
 import cats.instances.FutureInstances

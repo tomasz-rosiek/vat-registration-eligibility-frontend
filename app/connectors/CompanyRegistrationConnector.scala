@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import models.external.CompanyRegistrationProfile
 import play.api.Logger
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.http.ws.WSHttp
