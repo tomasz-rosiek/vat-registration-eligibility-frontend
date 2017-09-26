@@ -81,6 +81,13 @@ pages.eligibility.start.title                               = Can you use this s
 pages.eligibility.start.heading                             = Can you use this service?
 pages.eligibility.start.para1                               = Before you register for VAT, we need to ask some eligibility questions.
 
+## Service Eligibility Questions Validation
+validation.eligibility.haveNino.missing                     = Tell us if you have a National Insurance number
+validation.eligibility.doingBusinessAbroad.missing          = Tell us if you''ll do any of the following once you''re registered for VAT
+validation.eligibility.doAnyApplyToYou.missing              = Tell us if any of the following apply to you or your business
+validation.eligibility.applyingForAnyOf.missing             = Tell us if you''ll apply for any of the following
+validation.eligibility.companyWillDoAnyOf.missing           = Tell us if you''ll do any of the following
+
 ## Have Nino
 pages.eligibility.haveNino.title                            = Do you have a National Insurance number?
 pages.eligibility.haveNino.heading                          = Do you have a National Insurance number?
@@ -123,6 +130,7 @@ pages.voluntary.registration.heading                          = Do you want to r
 pages.voluntary.registration.para1                            = Based on your answers, you don''t need to register for VAT right now.
 pages.voluntary.registration.para2                            = You can still register voluntarily if the company will supply VAT taxable goods or services in the UK.
 pages.voluntary.registration.reason.panels.neither.para       = If none of these apply you won’t be able to register voluntarily for VAT.
+validation.voluntary.registration.missing                     = Tell us if you want to register voluntarily for VAT
 
 ## Voluntary Registration Reason Page
 pages.voluntary.registration.reason.title                     = Which one applies to the company?
@@ -130,11 +138,13 @@ pages.voluntary.registration.reason.heading                   = Which one applie
 pages.voluntary.registration.reason.radio.sells               = It already sells VAT taxable goods or services
 pages.voluntary.registration.reason.radio.intendsToSell       = It intends to sell VAT goods or services
 pages.voluntary.registration.reason.radio.neither             = Neither of these
+validation.voluntary.registration.reason.missing              = Tell us why you intend to register voluntarily for VAT
 
 ## Taxable Turnover Page
 pages.taxable.turnover.title                            = Do you expect the company to make VAT taxable sales of more than £85,000 in the 30 days after it''s registered with Companies House?
 pages.taxable.turnover.heading                          = Do you expect the company to make VAT taxable sales of more than £85,000 in the 30 days after it''s registered with Companies House?
 pages.taxable.turnover.p1                               = You must register immediately if you expect the company''s VAT taxable sales to be over £85,000 in the 30 days after it''s registered with Companies House.
+validation.taxable.turnover.missing                     = Tell us if you expect the company''s turnover to be more than £85,000 in the 30 days after it''s registered
 
 ## Post Incorp Threshold Questions
 ## Over Threshold
@@ -145,7 +155,14 @@ pages.thresholdQuestion1.panel.heading                    = When did this first 
 pages.thresholdQuestion1.panel.hint                       = For example, 02 2017
 pages.thresholdQuestion1.month                            = Month
 pages.thresholdQuestion1.year                             = Year
+validation.overThreshold.date.invalid                     = Enter a valid date
+validation.overThreshold.date.missing                     = Enter a valid date
+validation.overThreshold.selection.missing                = Tell us if since {0} the company''s VAT taxable turnover gone over £85,000
+validation.overThreshold.date.range.above                 = This date must be before the current month
+validation.overThreshold.date.range.below                 = This date must be after {0}
 
 ## Threshold Summary Page
 pages.thresholdSummary.title                              = Check and confirm your answers
 pages.thresholdSummary.heading                            = Check and confirm your answers
+pages.summary.threshold.overThresholdSelection            = Since {0} has the company''s VAT taxable turnover gone over £85,000?
+pages.summary.threshold.overThresholdDate                 = Month turnover went over £85,000

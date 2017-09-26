@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package services
+package common.enums
 
-import javax.inject.Singleton
-
-import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
-
-@Singleton
-class VatRegFrontendService extends VatRegFrontendSrv {
-
-}
-
-trait VatRegFrontendSrv {
-  def buildVatRegFrontendUrlEntry(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat/who-is-registering-the-company-for-vat"
-  def buildVatRegFrontendUrlWelcome(implicit hc: HeaderCarrier): String = "http://localhost:9895/register-for-vat"
+object CacheKeys extends Enumeration {
+  val CurrentProfile = Value
 }

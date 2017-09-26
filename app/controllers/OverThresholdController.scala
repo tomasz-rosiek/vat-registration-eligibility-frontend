@@ -32,8 +32,7 @@ class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
                                         implicit val s4LService: S4LService,
                                         implicit val vrs: VatRegistrationService,
                                         val currentProfileService: CurrentProfileService,
-                                        val formFactory: OverThresholdFormFactory,
-                                        val incorpInfoService: IncorpInfoService)
+                                        val formFactory: OverThresholdFormFactory)
   extends VatRegistrationController with FlatMapSyntax with SessionProfile {
 
   def show: Action[AnyContent] = authorised.async {
@@ -54,11 +53,12 @@ class OverThresholdController @Inject()(implicit val messagesApi: MessagesApi,
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
-          incorpInfoService.fetchDateOfIncorporation().flatMap(date =>
-            formFactory.form(date).bindFromRequest().fold(badForm =>
-              BadRequest(views.html.pages.over_threshold(badForm, date.format(FORMAT_DD_MMMM_Y))).pure,
-              data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
-            )
+          val dateOfIncorporation = profile.incorporationDate
+            .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
+
+          formFactory.form(dateOfIncorporation).bindFromRequest().fold(
+            badForm => BadRequest(views.html.pages.over_threshold(badForm, dateOfIncorporation.format(FORMAT_DD_MMMM_Y))).pure,
+            data => save(data).map(_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
           )
         }
   }

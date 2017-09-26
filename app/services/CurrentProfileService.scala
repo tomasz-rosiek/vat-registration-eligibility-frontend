@@ -16,12 +16,15 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
+import cats.data.OptionT
 import common.enums.VatRegStatus
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import models.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
+import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,10 +36,8 @@ class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,
                                       val incorpInfoService: IncorpInfoService,
                                       val vatRegistrationService: VatRegistrationService) {
 
-  private val CURRENT_PROFILE_KEY = "CurrentProfile"
-
   def getCurrentProfile()(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CURRENT_PROFILE_KEY) flatMap {
+    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap {
       case Some(profile) => Future.successful(profile)
       case None => buildCurrentProfile
     }
@@ -56,7 +57,7 @@ class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,
         vatRegistrationStatus = VatRegStatus.DRAFT,
         incorporationDate     = incorpDate
       )
-      _                     <- keystoreConnector.cache[CurrentProfile](CURRENT_PROFILE_KEY, profile)
+      _                     <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile)
     } yield profile
   }
 }

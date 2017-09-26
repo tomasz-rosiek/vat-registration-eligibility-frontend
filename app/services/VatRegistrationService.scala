@@ -16,21 +16,27 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
+import cats.data.OptionT
+import cats.implicits._
+import common.ConditionalFlatMap._
 import common.ErrorUtil.fail
-import connectors.{OptionalResponse, VatRegistrationConnector}
+import connectors.{KeystoreConnector, OptionalResponse, VatRegistrationConnector}
 import models._
 import models.api._
 import models.external.IncorporationInfo
 import play.api.libs.json.Format
 import uk.gov.hmrc.play.http.HeaderCarrier
+import common.enums.CacheKeys.{CurrentProfile => CurrentProfileKey}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class VatRegistrationService @Inject()(val s4LService: S4LService,
+                                       val keystoreConnector: KeystoreConnector,
                                        val vatRegConnector: VatRegistrationConnector) {
 
   private[services] def s4l[T: Format : S4LKey]()(implicit hc: HeaderCarrier, profile: CurrentProfile) =
@@ -57,4 +63,17 @@ class VatRegistrationService @Inject()(val s4LService: S4LService,
 
   def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): OptionalResponse[IncorporationInfo] =
     vatRegConnector.getIncorporationInfo(txId)
+
+  def getIncorporationDate(txId: String)(implicit headerCarrier: HeaderCarrier): OptionalResponse[LocalDate] =
+    OptionT(keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap { profile =>
+      profile
+        .getOrElse(throw new IllegalStateException("Current Profile expected to be found"))
+        .incorporationDate match {
+        case None => for {
+          incorpDate <- getIncorporationInfo(txId).subflatMap(_.statusEvent.incorporationDate).value
+          _ <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile.get.copy(incorporationDate = incorpDate))
+        } yield incorpDate
+        case o@_ => Future.successful(o)
+      }
+    })
 }

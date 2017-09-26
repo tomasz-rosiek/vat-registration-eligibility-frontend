@@ -18,18 +18,20 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import connectors.KeystoreConnector
 import org.apache.commons.lang3.StringUtils
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CurrentProfileService, IncorpInfoService}
+import services.{CurrentProfileService, VatRegistrationService}
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
 @Singleton
 class EligibilitySuccessController @Inject()(implicit val messagesApi: MessagesApi,
+                                             val keystoreConnector: KeystoreConnector,
                                              val currentProfileService: CurrentProfileService,
-                                             val incorpInfoService: IncorpInfoService)
+                                             val vatRegistrationService: VatRegistrationService)
   extends VatRegistrationController with SessionProfile {
 
   def show: Action[AnyContent] = authorised.async {
@@ -43,11 +45,10 @@ class EligibilitySuccessController @Inject()(implicit val messagesApi: MessagesA
   def submit: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { _ =>
-          incorpInfoService.fetchIncorporationInfo.subflatMap(_.statusEvent.crn).filter(StringUtils.isNotBlank)
-            .fold(controllers.routes.TaxableTurnoverController.show())(
-              crn =>
-                controllers.routes.OverThresholdController.show()).map(Redirect)
+        withCurrentProfile { profile =>
+          vatRegistrationService.getIncorporationDate(profile.transactionId).fold(controllers.routes.TaxableTurnoverController.show()) {
+            incorpDate => controllers.routes.OverThresholdController.show()
+          }.map(Redirect)
         }
   }
 }

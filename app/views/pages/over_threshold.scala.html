@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.errorSummary
 
-@main_template(title = messages("pages.thresholdQuestion1.title")) {
+@main_template(title = messages("pages.thresholdQuestion1.title"), scriptElem = Some(Html(s"""<script type="text/javascript" src='${routes.Assets.at("javascripts/main.js")}'></script>"""))) {
 
   <div class="grid-row">
     <div class="column-two-thirds">

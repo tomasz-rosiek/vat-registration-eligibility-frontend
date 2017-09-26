@@ -1,50 +1,51 @@
 # microservice specific routes
+GET         /assets/*file                                     controllers.Assets.at(path="/public", file)
 
 ## SIGN OUT
-GET         /sign-out                                                              controllers.callbacks.SignInOutController.signOut
+GET         /sign-out                                         controllers.callbacks.SignInOutController.signOut
 
 ## POST SIGN IN
-GET         /post-sign-in                                                          controllers.callbacks.SignInOutController.postSignIn
+GET         /post-sign-in                                     controllers.callbacks.SignInOutController.postSignIn
 
-GET         /use-this-service                                                      controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
+GET         /use-this-service                                 controllers.TwirlViewController.renderViewAuthorised(viewName="use-this-service")
 
 ## FEEDBACK
-GET         /feedback                                                              controllers.feedback.FeedbackController.show
+GET         /feedback                                         controllers.feedback.FeedbackController.show
 
 ## CAN OR CAN'T REGISTER
-GET         /can-register                                                          controllers.EligibilitySuccessController.show
-POST        /can-register                                                          controllers.EligibilitySuccessController.submit
+GET         /can-register                                     controllers.EligibilitySuccessController.show
+POST        /can-register                                     controllers.EligibilitySuccessController.submit
 
 ## SERVICE CRITERIA QUESTIONS
-GET         /cant-register                                                         controllers.ServiceCriteriaQuestionsController.ineligible()
+GET         /cant-register                                    controllers.ServiceCriteriaQuestionsController.ineligible()
 
-GET         /national-insurance-number                                             controllers.ServiceCriteriaQuestionsController.show(question = "haveNino")
-POST        /national-insurance-number                                             controllers.ServiceCriteriaQuestionsController.submit(question = "haveNino")
-GET         /international-business                                                controllers.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad")
-POST        /international-business                                                controllers.ServiceCriteriaQuestionsController.submit(question = "doingBusinessAbroad")
-GET         /involved-more-business-changing-status                                controllers.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou")
-POST        /involved-more-business-changing-status                                controllers.ServiceCriteriaQuestionsController.submit(question = "doAnyApplyToYou")
-GET         /agricultural-flat-rate                                                controllers.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf")
-POST        /agricultural-flat-rate                                                controllers.ServiceCriteriaQuestionsController.submit(question = "applyingForAnyOf")
-GET         /apply-for-any                                                         controllers.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf")
-POST        /apply-for-any                                                         controllers.ServiceCriteriaQuestionsController.submit(question = "companyWillDoAnyOf")
+GET         /national-insurance-number                        controllers.ServiceCriteriaQuestionsController.show(question = "haveNino")
+POST        /national-insurance-number                        controllers.ServiceCriteriaQuestionsController.submit(question = "haveNino")
+GET         /international-business                           controllers.ServiceCriteriaQuestionsController.show(question = "doingBusinessAbroad")
+POST        /international-business                           controllers.ServiceCriteriaQuestionsController.submit(question = "doingBusinessAbroad")
+GET         /involved-more-business-changing-status           controllers.ServiceCriteriaQuestionsController.show(question = "doAnyApplyToYou")
+POST        /involved-more-business-changing-status           controllers.ServiceCriteriaQuestionsController.submit(question = "doAnyApplyToYou")
+GET         /agricultural-flat-rate                           controllers.ServiceCriteriaQuestionsController.show(question = "applyingForAnyOf")
+POST        /agricultural-flat-rate                           controllers.ServiceCriteriaQuestionsController.submit(question = "applyingForAnyOf")
+GET         /apply-for-any                                    controllers.ServiceCriteriaQuestionsController.show(question = "companyWillDoAnyOf")
+POST        /apply-for-any                                    controllers.ServiceCriteriaQuestionsController.submit(question = "companyWillDoAnyOf")
 
 ## TAXABLE TURNOVER PAGE
-GET         /vat-taxable-sales-over-threshold                                      controllers.TaxableTurnoverController.show
-POST        /vat-taxable-sales-over-threshold                                      controllers.TaxableTurnoverController.submit
+GET         /vat-taxable-sales-over-threshold                 controllers.TaxableTurnoverController.show
+POST        /vat-taxable-sales-over-threshold                 controllers.TaxableTurnoverController.submit
 
 ## Post incorp threshold question 1
-GET         /gone-over-threshold                                                   controllers.OverThresholdController.show
-POST        /gone-over-threshold                                                   controllers.OverThresholdController.submit
+GET         /gone-over-threshold                              controllers.OverThresholdController.show
+POST        /gone-over-threshold                              controllers.OverThresholdController.submit
 
 ## Threshold summary
-GET         /check-confirm-answers                                                 controllers.ThresholdSummaryController.show
-POST        /check-confirm-answers                                                 controllers.ThresholdSummaryController.submit
+GET         /check-confirm-answers                            controllers.ThresholdSummaryController.show
+POST        /check-confirm-answers                            controllers.ThresholdSummaryController.submit
 
 ## VOLUNTARY REGISTRATION PAGE
-GET         /do-you-want-to-register-voluntarily                                   controllers.VoluntaryRegistrationController.show
-POST        /do-you-want-to-register-voluntarily                                   controllers.VoluntaryRegistrationController.submit
+GET         /do-you-want-to-register-voluntarily              controllers.VoluntaryRegistrationController.show
+POST        /do-you-want-to-register-voluntarily              controllers.VoluntaryRegistrationController.submit
 
 ## VOLUNTARY REGISTRATION REASON PAGE
-GET         /reason-for-registering                                                controllers.VoluntaryRegistrationReasonController.show
-POST        /reason-for-registering                                                controllers.VoluntaryRegistrationReasonController.submit
+GET         /reason-for-registering                           controllers.VoluntaryRegistrationReasonController.show
+POST        /reason-for-registering                           controllers.VoluntaryRegistrationReasonController.submit

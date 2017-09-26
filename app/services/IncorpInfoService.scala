@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import cats.data.OptionT
 import cats.instances.future._
-import connectors.{IncorporationInformationConnector, KeystoreConnector, OptionalResponse}
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import models.external.IncorporationInfo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -41,7 +41,6 @@ class IncorpInfoService @Inject()(val keystoreConnector: KeystoreConnector,
   def fetchIncorporationInfo()(implicit headerCarrier: HeaderCarrier) =
     OptionT(keystoreConnector.fetchAndGet[IncorporationInfo]("incorporationStatus"))
 
-  def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] =
     iiConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
-  }
 }
