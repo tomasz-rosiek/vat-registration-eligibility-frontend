@@ -54,6 +54,9 @@ trait VatRegistrationFixture extends TradingDetailsFixture {
   val testRegId = "VAT123456"
   val testMonthYearPresentationFormatter = DateTimeFormatter.ofPattern("MMMM y")
 
+  //Api models
+  val validServiceEligibility = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false))
+
   val emptyVatScheme = VatScheme(testRegId)
 
   val validVatScheme = VatScheme(
