@@ -52,7 +52,6 @@ trait FeatureManager {
 
 @Singleton
 class VREFEFeatureSwitch @Inject()(injManager: FeatureSwitchManager) extends VREFEFeatureSwitches {
-  val addressLookupUrl = "addressService"
   val companyRegistration = "companyRegistration"
   val manager = injManager
 }

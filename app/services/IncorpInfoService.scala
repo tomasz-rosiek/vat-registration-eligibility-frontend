@@ -32,15 +32,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class IncorpInfoService @Inject()(val keystoreConnector: KeystoreConnector,
                                   val iiConnector: IncorporationInformationConnector) {
 
-  def fetchDateOfIncorporation()(implicit hc: HeaderCarrier): Future[LocalDate] = {
-    OptionT(keystoreConnector.fetchAndGet[IncorporationInfo]("incorporationStatus"))
-      .subflatMap(_.statusEvent.incorporationDate)
-      .getOrElse(throw new IllegalStateException("Date of Incorporation data expected to be found in Incorporation"))
-  }
-
-  def fetchIncorporationInfo()(implicit headerCarrier: HeaderCarrier) =
-    OptionT(keystoreConnector.fetchAndGet[IncorporationInfo]("incorporationStatus"))
-
   def getCompanyName(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[String] =
     iiConnector.getCompanyName(regId, txId) map(_.\("company_name").as[String])
 }

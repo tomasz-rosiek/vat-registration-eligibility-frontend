@@ -21,9 +21,8 @@ import javax.inject.{Inject, Singleton}
 
 import cats.data.OptionT
 import cats.implicits._
-import common.ConditionalFlatMap._
 import common.ErrorUtil.fail
-import connectors.{KeystoreConnector, OptionalResponse, VatRegistrationConnector}
+import connectors.{KeystoreConnector, VatRegistrationConnector}
 import models._
 import models.api._
 import models.external.IncorporationInfo
@@ -61,19 +60,19 @@ class VatRegistrationService @Inject()(val s4LService: S4LService,
     } yield response
   }
 
-  def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): OptionalResponse[IncorporationInfo] =
-    vatRegConnector.getIncorporationInfo(txId)
+  def getIncorporationInfo(txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[IncorporationInfo]] =
+    vatRegConnector.getIncorporationInfo(txId).value
 
-  def getIncorporationDate(txId: String)(implicit headerCarrier: HeaderCarrier): OptionalResponse[LocalDate] =
-    OptionT(keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap { profile =>
+  def getIncorporationDate(txId: String)(implicit headerCarrier: HeaderCarrier): Future[Option[LocalDate]] =
+    keystoreConnector.fetchAndGet[CurrentProfile](CurrentProfileKey.toString) flatMap { profile =>
       profile
         .getOrElse(throw new IllegalStateException("Current Profile expected to be found"))
         .incorporationDate match {
         case None => for {
-          incorpDate <- getIncorporationInfo(txId).subflatMap(_.statusEvent.incorporationDate).value
+          incorpDate <- OptionT(getIncorporationInfo(txId)).subflatMap(_.statusEvent.incorporationDate).value
           _ <- keystoreConnector.cache[CurrentProfile](CurrentProfileKey.toString, profile.get.copy(incorporationDate = incorpDate))
         } yield incorpDate
         case o@_ => Future.successful(o)
       }
-    })
+    }
 }

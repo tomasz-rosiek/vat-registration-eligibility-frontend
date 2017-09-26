@@ -18,8 +18,8 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import cats.data.OptionT
 import connectors.KeystoreConnector
-import org.apache.commons.lang3.StringUtils
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services.{CurrentProfileService, VatRegistrationService}
@@ -46,7 +46,7 @@ class EligibilitySuccessController @Inject()(implicit val messagesApi: MessagesA
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          vatRegistrationService.getIncorporationDate(profile.transactionId).fold(controllers.routes.TaxableTurnoverController.show()) {
+          OptionT(vatRegistrationService.getIncorporationDate(profile.transactionId)).fold(controllers.routes.TaxableTurnoverController.show()) {
             incorpDate => controllers.routes.OverThresholdController.show()
           }.map(Redirect)
         }

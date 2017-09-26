@@ -48,7 +48,7 @@ class CurrentProfileService @Inject()(val keystoreConnector: KeystoreConnector,
       businessProfile       <- businessRegistrationConnector.retrieveBusinessProfile
       companyProfile        <- compRegConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       companyName           <- incorpInfoService.getCompanyName(businessProfile.registrationID, companyProfile.transactionId)
-      incorpInfo            <- vatRegistrationService.getIncorporationInfo(companyProfile.transactionId).value
+      incorpInfo            <- vatRegistrationService.getIncorporationInfo(companyProfile.transactionId)
       incorpDate            =  if(incorpInfo.isDefined) incorpInfo.get.statusEvent.incorporationDate else None
       profile               =  CurrentProfile(
         companyName           = companyName,
