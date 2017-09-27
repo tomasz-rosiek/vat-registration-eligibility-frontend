@@ -157,6 +157,35 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
 
+    "return 303 when final question posted" when {
+      "final question is submitted successfully" in {
+        val s4lData = Json.obj(
+          "vatEligibility" -> Json.obj(
+            "haveNino"            -> true,
+            "doingBusinessAbroad" -> false,
+            "doAnyApplyToYou" -> false,
+            "applyingForAnyOf" -> false
+          )
+        )
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfile
+          .vatScheme.isBlank
+          .audit.writesAudit()
+          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).contains(s4lData)
+          .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility")).isUpdatedWith(VatServiceEligibility(companyWillDoAnyOf = Some(false)))(S4LKey("VatServiceEligibility"),VatServiceEligibility.format)
+          .vatScheme.hasServiceEligibilityDataApartFromLastQuestion
+          .vatScheme
+            .isUpdatedWith(s4lData.deepMerge(Json.obj("vatEligibility" -> Json.obj("companyWillDoAnyOfRadio"-> false))))
+        val response = buildClient("/apply-for-any").post(Map("companyWillDoAnyOfRadio" -> Seq("false")))
+        whenReady(response){
+          res =>
+            res.status mustBe 303
+            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/can-register")
+        }
+      }
+    }
+
   }
   "Eligibility /cant-register on GET" should {
     "return 200" when{
@@ -187,12 +216,33 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
     "return 200" when {
       "user hits it but does not have a current profile so one is built up" in {
         given()
-            .user.isAuthorised
+          .user.isAuthorised
+          .keystoreS.hasKeyStoreValue("foo","true")
           .currentProfile.setup
           .audit.writesAudit()
         val response = buildClient("/can-register").get()
         whenReady(response)(_.status) mustBe 200
       }
+    }
+  }
+  "Eligility /can-register on POST" should {
+    "return 303 and redirect to gone over threshold" when {
+      "use is authorised and has a current profile" in {
+        given()
+          .user.isAuthorised
+          .keystoreS.hasKeyStoreValue("foo","true")
+          .currentProfile.setup
+          .currentProfile.withProfile
+          .audit.writesAudit()
+
+        val response = buildClient("/can-register").post(Map("haveNinoRadio" -> Seq("fooBars")))
+        whenReady(response){
+          res =>
+            res.status mustBe 303
+            res.header(HeaderNames.LOCATION) mustBe Some("/check-if-you-can-register-for-vat/gone-over-threshold")
+        }
+      }
+
     }
   }
 }

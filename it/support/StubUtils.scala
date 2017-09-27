@@ -294,6 +294,21 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
              """.stripMargin
           )))
 
+      stubFor(
+        get(urlPathEqualTo("/business-registration/business-tax-registration"))
+          .willReturn((ok(
+                    """
+                      |{
+                      | "registrationID" : "1",
+                      | "language" : "EN"
+                      |}
+                      |"""".stripMargin)
+              )
+            )
+      )
+      CorporationTaxRegistrationStub().existsWithStatus("held")
+
+
       stubKeystorePut("CurrentProfile",
         """
           |{
@@ -342,6 +357,25 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
           )))
       builder
     }
+
+
+
+    def hasServiceEligibilityDataApartFromLastQuestion:PreconditionBuilder = {
+      stubFor(
+        get(urlPathEqualTo("/vatreg/1/service-eligibility"))
+          .willReturn(ok(
+            s"""{ "registrationId" : "1",
+               | "vatEligibility" : {
+               |        "haveNino" : true,
+               |        "doingBusinessAbroad" : false,
+               |        "doAnyApplyToYou" : false,
+               |        "applyingForAnyOf" : false
+               |    }}""".stripMargin
+          )))
+      builder
+    }
+
+
     def isBlank: PreconditionBuilder = {
       stubFor(
         get(urlPathEqualTo("/vatreg/1/get-scheme"))

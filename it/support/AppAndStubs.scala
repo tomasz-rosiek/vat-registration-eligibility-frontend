@@ -54,12 +54,12 @@ trait AppAndStubs extends StartAndStopWireMock with StubUtils with OneServerPerS
     additionalConfiguration = replaceWithWiremock(Seq(
       "address-lookup-frontend",
       "auth",
-      "business-tax-registration",
+      "business-registration",
       "auth.company-auth",
       "vat-registration",
       "company-registration",
       "company-registration-frontend",
-      "incorporation-frontend-stub",
+      "incorporation-frontend-stubs",
       "incorporation-information",
       "cachable.short-lived-cache",
       "cachable.session-cache"
