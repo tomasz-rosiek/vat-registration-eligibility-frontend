@@ -18,8 +18,8 @@ package utils
 
 import java.time.LocalDate
 
-import common.enums.{CacheKeys, VatRegStatus}
-import helpers.VatRegSpec
+import common.enums.VatRegStatus
+import mocks.VatMocks
 import models.CurrentProfile
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
@@ -28,12 +28,15 @@ import play.api.test.Helpers._
 import services.CurrentProfileService
 import org.mockito.Matchers
 import org.mockito.Mockito.when
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
 
-class SessionProfileSpec extends VatRegSpec {
+class SessionProfileSpec extends UnitSpec with MockitoSugar with VatMocks {
+  implicit val hc = HeaderCarrier()
 
   object TestSession extends SessionProfile {
     override val currentProfileService: CurrentProfileService = mockCurrentProfileService
@@ -50,7 +53,7 @@ class SessionProfileSpec extends VatRegSpec {
         .thenReturn(Future.successful(validProfile()))
 
       val result = await(TestSession.withCurrentProfile { _ => testFunc })
-      result.header.status mustBe OK
+      status(result) shouldBe OK
     }
   }
 }

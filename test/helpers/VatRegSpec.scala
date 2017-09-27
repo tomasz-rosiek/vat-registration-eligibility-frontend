@@ -25,38 +25,35 @@ import common.enums.VatRegStatus
 import fixtures.{LoginFixture, VatRegistrationFixture}
 import mocks.VatMocks
 import models.CurrentProfile
-import org.mockito.Matchers
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.reset
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Assertion, BeforeAndAfterEach, Inside, Inspectors}
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.i18n.MessagesApi
+import play.api.inject.Injector
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Awaitable, Future}
+import scala.concurrent.Future
 
-class VatRegSpec extends PlaySpec with OneAppPerSuite
+class VatRegSpec extends UnitSpec with WithFakeApplication
   with MockitoSugar with VatMocks with LoginFixture with Inside with Inspectors
   with ScalaFutures with ApplicativeSyntax with FutureInstances with BeforeAndAfterEach with FutureAssertions with VatRegistrationFixture {
+
+  val injector : Injector = fakeApplication.injector
+
+  implicit lazy val mockMessages = injector.instanceOf[MessagesApi]
 
   implicit val hc = HeaderCarrier()
 
   implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
     VatRegStatus.DRAFT,Some(LocalDate.of(2017, 12, 21)))
 
-  when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any(), Matchers.any()))
-    .thenReturn(Future.successful(Some(currentProfile)))
-
   override implicit val patienceConfig = PatienceConfig(timeout = Span(1, Seconds), interval = Span(50, Millis))
-
-  implicit val duration = 5.seconds
-
-  def await[T](future : Awaitable[T]) : T = Await.result(future, duration)
 
   override def beforeEach() {
     reset(mockVatRegistrationService)
@@ -73,11 +70,13 @@ class VatRegSpec extends PlaySpec with OneAppPerSuite
     reset(mockIncorpInfoService)
     reset(mockWSHttp)
     reset(mockCurrentProfileService)
+    reset(mockVatRegFrontendService)
   }
 
   // Placeholder for custom configuration
   // Use this if you want to configure the app
   // implicit override lazy val app: Application = new GuiceApplicationBuilder().configure().build()
+
 
   def submitAuthorised(a: => Action[AnyContent], r: => FakeRequest[AnyContentAsFormUrlEncoded])
                       (test: Future[Result] => Assertion)

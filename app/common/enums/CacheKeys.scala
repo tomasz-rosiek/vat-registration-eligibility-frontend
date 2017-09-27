@@ -18,4 +18,5 @@ package common.enums
 
 object CacheKeys extends Enumeration {
   val CurrentProfile = Value
+  val IneligibilityReason = Value
 }

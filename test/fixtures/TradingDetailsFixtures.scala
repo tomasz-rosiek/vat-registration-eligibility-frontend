@@ -16,10 +16,13 @@
 
 package fixtures
 
+import java.time.LocalDate
+
 import models.api._
 import models.view.TaxableTurnover
 
-trait TradingDetailsFixture extends BaseFixture {
+trait TradingDetailsFixture {
+  val testDate = LocalDate.of(2017, 3, 21)
 
   //View models
   val validTaxableTurnover = TaxableTurnover("TAXABLE_YES")

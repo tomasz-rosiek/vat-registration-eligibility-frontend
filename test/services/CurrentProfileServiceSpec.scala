@@ -18,12 +18,11 @@ package services
 
 import java.time.LocalDate
 
-import cats.data.OptionT
 import common.enums.VatRegStatus
 import connectors.BusinessRegistrationConnector
 import helpers.VatRegSpec
 import models.CurrentProfile
-import models.external.{BusinessProfile, CompanyRegistrationProfile, IncorporationInfo}
+import models.external.{BusinessProfile, CompanyRegistrationProfile}
 import org.mockito.Matchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Format
@@ -64,7 +63,7 @@ class CurrentProfileServiceSpec extends VatRegSpec {
           .thenReturn(Future.successful(Some(testCurrentProfile())))
 
         val result = await(testService.getCurrentProfile())
-        result mustBe testCurrentProfile()
+        result shouldBe testCurrentProfile()
       }
 
       "build and store in Keystore" in {
@@ -90,7 +89,7 @@ class CurrentProfileServiceSpec extends VatRegSpec {
           .thenReturn(Future.successful(CacheMap("", Map())))
 
         val result = await(testService.getCurrentProfile())
-        result mustBe testCurrentProfile(testIncorporationInfo.statusEvent.incorporationDate)
+        result shouldBe testCurrentProfile(testIncorporationInfo.statusEvent.incorporationDate)
       }
     }
   }

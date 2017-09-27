@@ -20,13 +20,16 @@ import java.util.Base64
 
 import builders.SessionBuilder
 import org.scalatest.TestData
+import org.scalatest._
+import Matchers._
+import fixtures.LoginFixture
 import org.scalatestplus.play.{OneAppPerTest, PlaySpec}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Application, Environment, Mode}
 
-class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilder {
+class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilder with LoginFixture {
 
   override def newAppForTest(td: TestData): Application = new GuiceApplicationBuilder()
     .in(Environment(new java.io.File("."), classOf[FakeApplication].getClassLoader, Mode.Test))
@@ -52,11 +55,11 @@ class WhitelistFilterSpec extends PlaySpec with OneAppPerTest with SessionBuilde
     "let requests passing" when {
       "coming from an IP in the white list must work as normal" in {
         val request = FakeRequest(GET, "/check-if-you-can-register-for-vat/use-this-service").withHeaders("True-Client-IP" -> "11.22.33.44")
-        val Some(result) = route(app, updateRequestWithSession(request, "testUserId"))
+        val Some(result) = route(app, request)
 
         status(result) mustBe SEE_OTHER
 
-        redirectLocation(result) mustBe Some("/register-for-vat/before-you-register-for-vat")
+        redirectLocation(result).get should include(authUrl)
       }
 
       "coming from a IP NOT in the white-list and not with a white-listed path must be redirected" in {
