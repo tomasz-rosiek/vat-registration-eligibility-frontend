@@ -42,7 +42,7 @@ trait AuthBuilder {
   def withAuthorisedUser(action: Action[AnyContent])(test: Future[Result] => Any)(implicit mockAuthConnector: AuthConnector) {
     val userId = "testUserId"
     mockAuthorisedUser(userId)
-    val result = action(SessionBuilder.buildRequestWithSession(userId))
+    val result = action.apply(SessionBuilder.buildRequestWithSession(userId))
     test(result)
   }
 
@@ -56,7 +56,7 @@ trait AuthBuilder {
   def submitWithAuthorisedUser(action: Action[AnyContent], request: FakeRequest[AnyContentAsFormUrlEncoded])
                               (test: Future[Result] => Any)(implicit mockAuthConnector: AuthConnector) {
     val userId = "testUserId"
-    AuthBuilder.mockAuthorisedUser(userId)
+    mockAuthorisedUser(userId)
     val result = action.apply(SessionBuilder.updateRequestFormWithSession(request, userId))
     test(result)
   }

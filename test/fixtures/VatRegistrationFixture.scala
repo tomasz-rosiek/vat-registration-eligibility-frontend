@@ -24,35 +24,10 @@ import models.external.{IncorporationInfo, _}
 import play.api.http.Status._
 import uk.gov.hmrc.play.http._
 
-trait BaseFixture {
-  //Test variables
-  val testDate = LocalDate.of(2017, 3, 21)
-  val testTradingName = "ACME INC"
-  val testSortCode = "12-34-56"
-  val testAccountNumber = "12345678"
-}
-
 trait VatRegistrationFixture extends TradingDetailsFixture {
 
-  //Responses
-  val IM_A_TEAPOT = 418
-  val forbidden = Upstream4xxResponse(FORBIDDEN.toString, FORBIDDEN, FORBIDDEN)
-  val upstream4xx = Upstream4xxResponse(IM_A_TEAPOT.toString, IM_A_TEAPOT, IM_A_TEAPOT)
-  val upstream5xx = Upstream5xxResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
-  val validHttpResponse = HttpResponse(OK)
-
-  //Exceptions
-  val badRequest = new BadRequestException(BAD_REQUEST.toString)
-  val notFound = new NotFoundException(NOT_FOUND.toString)
-  val internalServiceException = new InternalServerException(BAD_GATEWAY.toString)
-  val runTimeException = new RuntimeException("tst")
-
   //Test variables
-  val contextRoot = "/register-for-vat"
-  val testNino: String = "AA 12 34 56 C"
-  val testBusinessActivityDescription = "description"
   val testRegId = "VAT123456"
-  val testMonthYearPresentationFormatter = DateTimeFormatter.ofPattern("MMMM y")
 
   //Api models
   val validServiceEligibility = VatServiceEligibility(Some(true), Some(false), Some(false), Some(false), Some(false))
