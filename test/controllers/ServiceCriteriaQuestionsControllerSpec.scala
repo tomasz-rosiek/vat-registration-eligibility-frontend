@@ -78,15 +78,23 @@ class ServiceCriteriaQuestionsControllerSpec extends VatRegSpec with VatRegistra
   }
 
   "POST ServiceCriteriaQuestionsController.submit()" should {
-    def urlForQuestion(eligibilityQuestion: EligibilityQuestion): String =
-      controllers.routes.ServiceCriteriaQuestionsController.show(eligibilityQuestion.name).url
+    //TODO: fix reverse route when exec unit test with testOnly - SCRS-9055
+    def addPrefix(url: String): String = {
+      if (!url.startsWith("/check-if-you-can-register-for-vat")) {
+        s"/check-if-you-can-register-for-vat$url"
+      } else url
+    }
+
+    def urlForQuestion(eligibilityQuestion: EligibilityQuestion): String = {
+      addPrefix(controllers.routes.ServiceCriteriaQuestionsController.show(eligibilityQuestion.name).url)
+    }
 
     val questions = Seq(
       HaveNinoQuestion -> urlForQuestion(DoingBusinessAbroadQuestion),
       DoingBusinessAbroadQuestion -> urlForQuestion(DoAnyApplyToYouQuestion),
       DoAnyApplyToYouQuestion -> urlForQuestion(ApplyingForAnyOfQuestion),
       ApplyingForAnyOfQuestion -> urlForQuestion(CompanyWillDoAnyOfQuestion),
-      CompanyWillDoAnyOfQuestion -> controllers.routes.EligibilitySuccessController.show().url
+      CompanyWillDoAnyOfQuestion -> addPrefix(controllers.routes.EligibilitySuccessController.show().url)
     )
 
     println(questions)
