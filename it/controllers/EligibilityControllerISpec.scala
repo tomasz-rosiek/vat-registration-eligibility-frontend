@@ -158,4 +158,41 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
     }
 
   }
+  "Eligibility /cant-register on GET" should {
+    "return 200" when{
+      "user hits it directly where a question has a inelligibility reason" in {
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfile
+          .vatScheme.isBlank
+          .audit.writesAudit()
+          .keystoreS.putKeyStoreValue("ineligibility-reason",""""haveNino"""")
+
+        val response = buildClient("/cant-register").get()
+        whenReady(response)(_.status) mustBe 200
+      }
+    }
+  }
+  "Eligibility /can-register on GET" should {
+    "return 200" when {
+      "user hits it directly with a current profile" in {
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfile
+
+        val response = buildClient("/can-register").get()
+        whenReady(response)(_.status) mustBe 200
+      }
+    }
+    "return 200" when {
+      "user hits it but does not have a current profile so one is built up" in {
+        given()
+            .user.isAuthorised
+          .currentProfile.setup
+          .audit.writesAudit()
+        val response = buildClient("/can-register").get()
+        whenReady(response)(_.status) mustBe 200
+      }
+    }
+  }
 }
