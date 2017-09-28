@@ -70,6 +70,8 @@ trait StubUtils {
 
     def keystoreS = ksStub()
 
+    def businessReg = BusinessRegStub()
+
   }
 
   def given(): PreconditionBuilder = {
@@ -82,16 +84,58 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
       builder
     }
 
+  def hasKeystoreValueWithKeyInUrl(key:String,data:String,urlKey:String):PreconditionBuilder = {
+    stubKeystoreGetWithUrl(key,data,urlKey)
+    builder
+  }
+
+  def putKeyStoreValueWithKeyInUrl(key:String,data:String,urlKey:String):PreconditionBuilder = {
+    stubKeystorePutWithUrl(key,data,urlKey)
+    builder
+  }
+
   def putKeyStoreValue(key:String,data:String):PreconditionBuilder ={
     stubKeystorePut(key,data)
     builder
   }
   }
 
+  case class BusinessRegStub()(implicit builder:PreconditionBuilder)  {
+    def getBusinessprofileSuccessfully = {
+      stubFor(
+        get(urlPathEqualTo("/business-registration/business-tax-registration"))
+          .willReturn((ok(
+            """
+              |{
+              | "registrationID" : "1",
+              | "language" : "EN"
+              |}
+              |"""".stripMargin)
+            )
+          )
+      )
+      builder
+    }
+  }
+
   trait KeystoreStub {
     def stubKeystorePut(key: String, data: String): StubMapping =
       stubFor(
         put(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$key"))
+          .willReturn(ok(
+            s"""
+               |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
+               |    "data": { "$key": $data },
+               |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
+               |    "modifiedDetails": {
+               |      "createdAt": { "$$date": 1502265526026 },
+               |      "lastUpdated": { "$$date": 1502265526026 }}}
+            """.stripMargin
+          )))
+
+    def stubKeystorePutWithUrl(key: String, data: String,urlKey:String): StubMapping =
+      stubFor(
+        put(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$urlKey"))
           .willReturn(ok(
             s"""
                |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
@@ -117,7 +161,23 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
             """.stripMargin
           )))
 
-  }}
+  }
+  def stubKeystoreGetWithUrl(key:String,data:String,urlKey:String):StubMapping = {
+    stubFor(
+      get(urlPathMatching(s"/keystore/vat-registration-eligibility-frontend/session-[a-z0-9-]+/data/$urlKey"))
+        .willReturn(ok(
+          s"""
+             |{ "atomicId": { "$$oid": "598ac0b64e0000d800170620" },
+             |    "data": { "$key": $data },
+             |    "id": "session-ac4ed3e7-dbc3-4150-9574-40771c4285c1",
+             |    "modifiedDetails": {
+             |      "createdAt": { "$$date": 1502265526026 },
+             |      "lastUpdated": { "$$date": 1502265526026 }}}
+            """.stripMargin
+        )))
+
+   }
+  }
 
   trait S4LStub {
 
@@ -322,7 +382,11 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
       builder
     }
 
-    def withProfile: PreconditionBuilder = {
+    def withProfileAndIncorpDate = withProfileInclIncorp(true)
+    def withProfile = withProfileInclIncorp(false)
+
+   private val withProfileInclIncorp = (withIncorporationDate:Boolean) => {
+      val incorporationDate = """","incorporationDate" : "000-434-1"""
       stubKeystoreGet("CurrentProfile",
         s"""
           |{
@@ -330,9 +394,9 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
           | "registrationID" : "1",
           | "transactionID" : "000-434-1",
           | "vatRegistrationStatus" : "${VatRegStatus.DRAFT}"
+          | ${if(withIncorporationDate) incorporationDate}
           |}
         """.stripMargin)
-
       builder
     }
   }

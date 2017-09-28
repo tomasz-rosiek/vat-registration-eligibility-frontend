@@ -9,7 +9,7 @@ object FrontendBuild extends Build with MicroService {
 
   val appName = "vat-registration-eligibility-frontend"
 
-  override lazy val appDependencies: Seq[ModuleID] = compile ++ test()
+  override lazy val appDependencies: Seq[ModuleID] = compile ++ test(Test) ++ test(IntegrationTest)
 
   val compile = Seq(
     cache,
@@ -29,7 +29,7 @@ object FrontendBuild extends Build with MicroService {
     "org.typelevel" %% "cats" % "0.9.0"
   )
 
-  def test(scope: String = "test") = Seq(
+  def test(scope: Configuration) = Seq(
     "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
     "org.scalatest" %% "scalatest" % "3.0.0" % scope,
     "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,

@@ -135,8 +135,8 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .contains(VatServiceEligibility(haveNino = Some(false)))
           .s4lContainer[VatServiceEligibility](S4LKey("VatServiceEligibility"))
           .isUpdatedWith(VatServiceEligibility(haveNino = Some(false)))(S4LKey("VatServiceEligibility"),VatServiceEligibility.format)
-          .keystoreS.putKeyStoreValue("ineligibility-reason",""""haveNino"""")
-
+          .keystoreS.putKeyStoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
+          .keystoreS.hasKeystoreValueWithKeyInUrl("ineligibility-reason",""""haveNino"""","IneligibilityReason")
         val response = buildClient("/national-insurance-number").post(Map("haveNinoRadio" -> Seq("false")))
         val res = whenReady(response)(a => a)
         res.status mustBe 303
@@ -221,6 +221,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
           .keystoreS.hasKeyStoreValue("foo","true")
           .currentProfile.setup
           .audit.writesAudit()
+
         val response = buildClient("/can-register").get()
         whenReady(response)(_.status) mustBe 200
       }
