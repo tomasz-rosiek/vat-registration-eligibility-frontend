@@ -18,6 +18,7 @@ package controllers
 
 import models.S4LKey
 import models.api.VatServiceEligibility
+import models.view.TaxableTurnover
 import org.jsoup.Jsoup
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -31,7 +32,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
 
   "Eligibility questions on GET" should {
     "return 200" when {
-      "[Q1] The user is authorised, current prof is setup, vatscheme is blank,audit is successful, s4l 404's" in {
+      "[Q1] /national-insurance-number The user is authorised, current prof is setup, vatscheme is blank,audit is successful, s4l 404's" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -43,7 +44,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 200" when {
-      "[Q2] the user is authorised, current prof is setup, vatscheme is blank,audit fails, s4l returns valid data" in {
+      "[Q2] /international-business the user is authorised, current prof is setup, vatscheme is blank,audit fails, s4l returns valid data" in {
 
         val s4lData = Json.obj(
           "vatEligibility" -> Json.obj(
@@ -68,7 +69,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 404" when {
-      "[Q3] the user is not authorised to view the page but session is valid" in {
+      "[Q3] /involved-more-business-changing-status the user is not authorised to view the page but session is valid" in {
         given()
           .user.isNotAuthorised
           .audit.writesAudit()
@@ -78,7 +79,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 303" when {
-      "[Q4] the user is authorised but the request is invalid" in {
+      "[Q4] /agricultural-flat-rate the user is authorised but the request is invalid" in {
         given()
           .user.isNotAuthorised
           .audit.writesAudit()
@@ -88,7 +89,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 200" when {
-      "[Q5] the user is authorised and data is in vat reg backend. data is pulled from vat because S4l returns 404" in {
+      "[Q5] /apply-for-any the user is authorised and data is in vat reg backend. data is pulled from vat because S4l returns 404" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -106,7 +107,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
   }
   "Eligibility questions on POST" should {
     "return 303 and redirects to next page of questions" when {
-      "[Q1] the user submits an answer" in {
+      "[Q1] /national-insurance-number the user submits an answer" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -124,7 +125,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 303 and redirects to next page of you are not eligible" when {
-      "[Q1] the user submits an answer which is false" in {
+      "[Q1] /national-insurance-number the user submits an answer which is false" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -143,7 +144,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
       }
     }
     "return 400 when invalid form is posted" when {
-      "[Q5] the user submits an incorrect value in the form" in {
+      "[Q5] /apply-for-any the user submits an incorrect value in the form" in {
         given()
           .user.isAuthorised
           .currentProfile.withProfile
@@ -158,7 +159,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
     }
 
     "return 303 when final question posted" when {
-      "final question is submitted successfully" in {
+      "/apply-for-any final question is submitted successfully" in {
         val s4lData = Json.obj(
           "vatEligibility" -> Json.obj(
             "haveNino"            -> true,
@@ -227,7 +228,7 @@ class EligibilityControllerISpec extends PlaySpec with AppAndStubs with ScalaFut
   }
   "Eligility /can-register on POST" should {
     "return 303 and redirect to gone over threshold" when {
-      "use is authorised and has a current profile" in {
+      "user is authorised and has a current profile" in {
         given()
           .user.isAuthorised
           .keystoreS.hasKeyStoreValue("foo","true")
