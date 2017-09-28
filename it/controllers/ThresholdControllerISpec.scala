@@ -1,10 +1,10 @@
 package controllers
 
-import models.S4LKey
-import models.view.{TaxableTurnover, VoluntaryRegistration}
+import models.{S4LKey, S4LTradingDetails}
+import models.view.{OverThresholdView, TaxableTurnover, VoluntaryRegistration}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import support.AppAndStubs
 
 
@@ -60,14 +60,36 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
   "/gone-over-threshold POST" should{
     "return 303" when {
       "when the request is valid" in {
-
+        given()
+          .user.isAuthorised
+          .currentProfile.withProfileAndIncorpDate
+          .vatScheme.isBlank
+          .audit.writesAudit()
+          .s4lContainer[OverThresholdView](S4LKey("VatTradingDetails")).isEmpty
+          .s4lContainer[OverThresholdView](S4LKey("VatTradingDetails")).isUpdatedWith(OverThresholdView(false))(S4LKey("VatTradingDetails"),OverThresholdView.format)
+        val response = buildClient("/gone-over-threshold").post(Map("overThresholdRadio" ->Seq("false")))
+        whenReady(response)(_.status) mustBe 303
       }
     }
   }
   "/check-confirm-answers GET" should {
     "return 200" when {
       "when the request is valid" in {
+        val s4lData = Json.toJson(S4LTradingDetails(Some(
+          TaxableTurnover("TAXABLE_YES"))
+          ,Some(VoluntaryRegistration("REGISTER_NO"))
+          ,None
+          ,Some(OverThresholdView(false))))
 
+          given()
+          .user.isAuthorised
+          .currentProfile.withProfileAndIncorpDate
+          .vatScheme.isBlank
+          .audit.writesAudit()
+            .s4lContainer[S4LTradingDetails](S4LKey("VatTradingDetails")).contains(s4lData)
+
+        val response = buildClient("/check-confirm-answers").get()
+        whenReady(response)(_.status) mustBe 200
       }
     }
   }
