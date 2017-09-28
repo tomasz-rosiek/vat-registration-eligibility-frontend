@@ -386,21 +386,18 @@ case class ksStub()(implicit builder:PreconditionBuilder) extends KeystoreStub {
     def withProfile = withProfileInclIncorp(false)
 
    private val withProfileInclIncorp = (withIncorporationDate:Boolean) => {
-      val incorporationDate = """","incorporationDate" : "000-434-1"""
-      stubKeystoreGet("CurrentProfile",
-        s"""
-          |{
-          | "companyName" : "testCompanyName",
-          | "registrationID" : "1",
-          | "transactionID" : "000-434-1",
-          | "vatRegistrationStatus" : "${VatRegStatus.DRAFT}"
-          | ${if(withIncorporationDate) incorporationDate}
-          |}
-        """.stripMargin)
+      val incorporationDate = ""","incorporationDate": "2016-08-05"}"""
+    val js = s"""
+        |{
+        | "companyName" : "testCompanyName",
+        | "registrationID" : "1",
+        | "transactionID" : "000-434-1",
+        | "vatRegistrationStatus" : "${VatRegStatus.DRAFT}"
+        """.stripMargin
+     stubKeystoreGet("CurrentProfile",  if(withIncorporationDate) js + incorporationDate else js + "}")
       builder
     }
   }
-
 
   case class VatSchemeStub
   ()

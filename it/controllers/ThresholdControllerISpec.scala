@@ -47,11 +47,62 @@ class ThresholdControllerISpec extends PlaySpec with AppAndStubs with ScalaFutur
       "when user is authorised and has a date of incorporation" in {
         given()
           .user.isAuthorised
+          .vatScheme.isBlank
           .currentProfile.withProfileAndIncorpDate
           .audit.writesAudit()
 
         val response = buildClient("/gone-over-threshold").get()
         whenReady(response)(_.status) mustBe 200
+      }
+    }
+  }
+
+  "/gone-over-threshold POST" should{
+    "return 303" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/check-confirm-answers GET" should {
+    "return 200" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/check-confirm-answers POST" should {
+    "return 303" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/do-you-want-to-register-voluntarily GET" should {
+    "return 200" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/do-you-want-to-register-voluntarily POST" should {
+    "return 303" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/reason-for-registering GET" should {
+    "return 200" when {
+      "when the request is valid" in {
+
+      }
+    }
+  }
+  "/reason-for-registering POST" should {
+    "return 303" when {
+      "when the request is valid" in {
+
       }
     }
   }
