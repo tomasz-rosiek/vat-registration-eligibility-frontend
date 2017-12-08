@@ -16,6 +16,7 @@
 
 package models.api
 
+import org.joda.time.LocalDate
 import play.api.libs.json.{Json, OFormat}
 
 case class VatEligibilityChoice(necessity: String, // "obligatory" or "voluntary"
@@ -30,4 +31,12 @@ object VatEligibilityChoice {
 
   implicit val format: OFormat[VatEligibilityChoice] = Json.format[VatEligibilityChoice]
 
+}
+
+case class Threshold(overThresholdDate: Option[LocalDate],
+                     expectedOverThresholdDate:Option[LocalDate],
+                     mandatoryRegistration:Boolean,
+                     voluntaryReason: Option[String])
+object Threshold{
+  implicit val format = Json.format[Threshold]
 }

@@ -30,3 +30,10 @@ object VatServiceEligibility {
   implicit val format: OFormat[VatServiceEligibility] = Json.format
 }
 
+case class Eligibility(version:Int,
+                       result:String)
+
+object Eligibility{
+  implicit val format = Json.format[Eligibility]
+}
+
