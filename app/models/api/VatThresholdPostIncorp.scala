@@ -24,7 +24,5 @@ case class VatThresholdPostIncorp(overThresholdSelection: Boolean,
                                   overThresholdDate: Option[LocalDate])
 
 object VatThresholdPostIncorp {
-
   implicit val format = Json.format[VatThresholdPostIncorp]
-
 }

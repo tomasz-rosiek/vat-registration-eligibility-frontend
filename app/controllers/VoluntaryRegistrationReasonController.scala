@@ -16,23 +16,27 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import forms.VoluntaryRegistrationReasonForm
 import models.view.VoluntaryRegistrationReason
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, VatRegFrontendService}
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
-@Singleton
-class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: MessagesApi,
-                                                      implicit val s4l: S4LService,
-                                                      implicit val vrs: VatRegistrationService,
-                                                      val currentProfileService: CurrentProfileService,
-                                                      val vatRegFrontendService: VatRegFrontendService,
-                                                      val eligibilityService: EligibilityService)
-  extends VatRegistrationController with SessionProfile {
+import scala.concurrent.Future
+
+class VoluntaryRegistrationReasonControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                                          val authConnector: AuthConnector,
+                                                          val currentProfileService: CurrentProfileService,
+                                                          val vatRegFrontendService: VatRegFrontendService,
+                                                          val eligibilityService: EligibilityService) extends VoluntaryRegistrationReasonController
+
+trait VoluntaryRegistrationReasonController extends VatRegistrationController with SessionProfile  {
+  val eligibilityService: EligibilityService
+  val vatRegFrontendService: VatRegFrontendService
 
   val form = VoluntaryRegistrationReasonForm.form
 
@@ -41,9 +45,8 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
       implicit request =>
         withCurrentProfile { implicit profile =>
           eligibilityService.getEligibilityChoice map { choice =>
-            Ok(views.html.pages.voluntary_registration_reason(
-              choice.voluntaryRegistrationReason.fold(form)(form.fill)
-            ))
+            val voluntaryRegistrationReasonView = choice.voluntaryRegistrationReason.fold(form)(form.fill)
+            Ok(views.html.pages.voluntary_registration_reason(voluntaryRegistrationReasonView))
           }
         }
   }
@@ -53,8 +56,8 @@ class VoluntaryRegistrationReasonController @Inject()(implicit val messagesApi: 
       implicit request =>
         withCurrentProfile { implicit profile =>
           form.bindFromRequest().fold(
-            badForm => BadRequest(views.html.pages.voluntary_registration_reason(badForm)).pure,
-            data => eligibilityService.saveChoiceQuestion(data) map { _ =>
+            badForm => Future.successful(BadRequest(views.html.pages.voluntary_registration_reason(badForm))),
+            data    => eligibilityService.saveChoiceQuestion(data) map { _ =>
               if (data.reason == VoluntaryRegistrationReason.NEITHER) {
                 Redirect(vatRegFrontendService.buildVatRegFrontendUrlWelcome)
               } else {

@@ -16,6 +16,8 @@
 
 package common.enums
 
+import scala.language.implicitConversions
+
 object CacheKeys extends Enumeration {
   val CurrentProfile = Value
   val IneligibilityReason = Value

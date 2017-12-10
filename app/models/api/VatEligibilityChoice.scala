@@ -22,21 +22,20 @@ import play.api.libs.json.{Json, OFormat}
 case class VatEligibilityChoice(necessity: String, // "obligatory" or "voluntary"
                                 reason: Option[String] = None,
                                 vatThresholdPostIncorp: Option[VatThresholdPostIncorp] = None,
-                                vatExpectedThresholdPostIncorp:Option[VatExpectedThresholdPostIncorp] = None)
+                                vatExpectedThresholdPostIncorp: Option[VatExpectedThresholdPostIncorp] = None)
 
 object VatEligibilityChoice {
-
   val NECESSITY_OBLIGATORY = "obligatory"
   val NECESSITY_VOLUNTARY = "voluntary"
 
   implicit val format: OFormat[VatEligibilityChoice] = Json.format[VatEligibilityChoice]
-
 }
 
 case class Threshold(overThresholdDate: Option[LocalDate],
-                     expectedOverThresholdDate:Option[LocalDate],
-                     mandatoryRegistration:Boolean,
+                     expectedOverThresholdDate: Option[LocalDate],
+                     mandatoryRegistration: Boolean,
                      voluntaryReason: Option[String])
+
 object Threshold{
   implicit val format = Json.format[Threshold]
 }

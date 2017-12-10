@@ -27,15 +27,16 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class SummaryService @Inject()(val eligibilityService: EligibilityService) extends SummarySrv
+class SummaryServiceImpl @Inject()(val eligibilityService: EligibilityService) extends SummaryService
 
-trait SummarySrv{
+trait SummaryService {
   val eligibilityService: EligibilityService
 
-  def getEligibilitySummary()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] =
+  def getEligibilitySummary(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] = {
     eligibilityService.getEligibility.map(a => eligibilitySummary(eligibilityService.toApi(a)))
+  }
 
-  private def eligibilitySummary(vs: VatServiceEligibility)(implicit profile : CurrentProfile): Summary =
+  private def eligibilitySummary(vs: VatServiceEligibility): Summary = {
     Summary(Seq(
       SummaryNationalInsuranceBuilder(vs).section,
       SummaryInternationalBusinessBuilder(vs).section,
@@ -44,4 +45,5 @@ trait SummarySrv{
       SummaryVatExemptionBuilder(vs).section,
       SummaryResourceBuilder(vs).section
     ))
+  }
 }

@@ -21,36 +21,35 @@ import javax.inject.Inject
 import controllers.builders.SummaryVatThresholdBuilder
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
 import models.api.{VatExpectedThresholdPostIncorp, VatThresholdPostIncorp}
-import models.view.{ExpectationOverThresholdView, OverThresholdView, Summary, VoluntaryRegistration}
-import models.view.VoluntaryRegistration.REGISTER_NO
-import models.{CurrentProfile, MonthYearModel, S4LVatEligibilityChoice, hasIncorpDate}
+import models.view.{ExpectationOverThresholdView, OverThresholdView, Summary}
+import models.{CurrentProfile, hasIncorpDate}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, VatRegFrontendService, VatRegistrationService}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi,
-                                           implicit val s4LService: S4LService,
-                                           implicit val vrs: VatRegistrationService,
-                                           val currentProfileService: CurrentProfileService,
-                                           val vatRegFrontendService: VatRegFrontendService,
-                                           val eligibilityService: EligibilityService)
-  extends VatRegistrationController with SessionProfile {
+class ThresholdSummaryControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                               val authConnector: AuthConnector,
+                                               val vrs: VatRegistrationService,
+                                               val currentProfileService: CurrentProfileService,
+                                               val vatRegFrontendService: VatRegFrontendService,
+                                               val eligibilityService: EligibilityService) extends ThresholdSummaryController
+
+trait ThresholdSummaryController extends VatRegistrationController with SessionProfile {
+  val eligibilityService: EligibilityService
+  val vatRegFrontendService: VatRegFrontendService
 
   def show: Action[AnyContent] = authorised.async {
     implicit user =>
       implicit request =>
         withCurrentProfile { implicit profile =>
           hasIncorpDate.unapply.flatMap { incorpDate =>
-            getThresholdSummary() map {
-              thresholdSummary =>
-                Ok(views.html.pages.threshold_summary(
-                  thresholdSummary,
-                  incorpDate.format(FORMAT_DD_MMMM_Y)
-                ))
+            getThresholdSummary map { thresholdSummary =>
+              Ok(views.html.pages.threshold_summary(thresholdSummary, incorpDate.format(FORMAT_DD_MMMM_Y)))
             }
           }
         }
@@ -62,7 +61,7 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
         withCurrentProfile { implicit profile =>
           eligibilityService.getEligibilityChoice map { choice =>
             if (choice.overThreshold.getOrElse(OverThresholdView(false)).selection ||
-                choice.expectationOverThreshold.getOrElse(ExpectationOverThresholdView(false)).selection) {
+              choice.expectationOverThreshold.getOrElse(ExpectationOverThresholdView(false)).selection) {
               Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
             } else {
               Redirect(controllers.routes.VoluntaryRegistrationController.show())
@@ -72,31 +71,26 @@ class ThresholdSummaryController @Inject()(implicit val messagesApi: MessagesApi
       }
   }
 
-  def getThresholdSummary()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] = {
+  def getThresholdSummary(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[Summary] = {
     for {
-      (threshold,expectedThreshold) <- getVatThresholdAndExpectedThreshold()
+      (threshold,expectedThreshold) <- getVatThresholdAndExpectedThreshold
     } yield thresholdToSummary(threshold, expectedThreshold)
   }
 
   def thresholdToSummary(vatThresholdPostIncorp: VatThresholdPostIncorp, expectedThresholdPostIncorp: VatExpectedThresholdPostIncorp): Summary = {
-    Summary(Seq(
-      SummaryVatThresholdBuilder(Some(vatThresholdPostIncorp), Some(expectedThresholdPostIncorp)).section
-    ))
+    Summary(Seq(SummaryVatThresholdBuilder(Some(vatThresholdPostIncorp), Some(expectedThresholdPostIncorp)).section))
   }
 
-  def getVatThresholdAndExpectedThreshold()(implicit hc: HeaderCarrier, profile: CurrentProfile): Future[(VatThresholdPostIncorp,VatExpectedThresholdPostIncorp)] = {
-    for {
-      vatChoice <- eligibilityService.getEligibilityChoice
-      overThreshold <- vatChoice.overThreshold.pure
-      expected <- vatChoice.expectationOverThreshold.pure
-    } yield mapToModels(overThreshold, expected)
+  def getVatThresholdAndExpectedThreshold(implicit hc: HeaderCarrier,
+                                          profile: CurrentProfile): Future[(VatThresholdPostIncorp,VatExpectedThresholdPostIncorp)] = {
+    eligibilityService.getEligibilityChoice map { vatChoice =>
+      mapToModels(vatChoice.overThreshold, vatChoice.expectationOverThreshold)
+    }
   }
 
   def mapToModels(thresholdView: Option[OverThresholdView],
-                  expectedThresholdView: Option[ExpectationOverThresholdView])
-  : (VatThresholdPostIncorp, VatExpectedThresholdPostIncorp) = {
+                  expectedThresholdView: Option[ExpectationOverThresholdView]): (VatThresholdPostIncorp, VatExpectedThresholdPostIncorp) = {
     (thresholdView.map(a => VatThresholdPostIncorp(a.selection, a.date)).get,
       expectedThresholdView.map(a => VatExpectedThresholdPostIncorp(a.selection, a.date)).get)
   }
 }
-

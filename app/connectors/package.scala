@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-import cats.data.OptionT
-import play.api.Logger
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.http.Status
+import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
 
-import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
+import scala.language.implicitConversions
 
 package object connectors {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 
-  type OptionalResponse[T] = OptionT[Future, T]
+  implicit def classToString(`class`: Class[_]): String = `class`.toString
 
-  private[connectors] def logResponse(e: Throwable, c: String, f: String): Throwable = {
-    def log(s: String) = Logger.warn(s"[$c] [$f] received $s")
+  private[connectors] def logResponse(e: Throwable, f: String): Throwable = {
+    def log(s: String): Unit = logger.warn(s"[$f] received $s")
 
     e match {
-      case e: NotFoundException => log("NOT FOUND")
+      case e: NotFoundException   => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
         case Status.FORBIDDEN => log("FORBIDDEN")
-        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+        case _                => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
       }
       case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception => log(s"ERROR: ${e.getMessage}")
+      case e: Exception           => log(s"ERROR: ${e.getMessage}")
     }
     e
   }
-
 }
 

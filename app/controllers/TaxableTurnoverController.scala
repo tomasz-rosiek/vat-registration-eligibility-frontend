@@ -16,27 +16,28 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import forms.TaxableTurnoverForm
-import models.view.{TaxableTurnover, VoluntaryRegistration}
 import models.view.TaxableTurnover.TAXABLE_YES
-import models.view.VoluntaryRegistration.REGISTER_NO
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CurrentProfileService, EligibilityService, S4LService, VatRegFrontendService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService, VatRegFrontendService, VatRegistrationService}
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
-@Singleton
-class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
-                                          implicit val s4LService: S4LService,
-                                          implicit val vrs: VatRegistrationService,
-                                          val currentProfileService: CurrentProfileService,
-                                          val vatRegFrontendService: VatRegFrontendService,
-                                          val eligibilityService: EligibilityService)
-  extends VatRegistrationController with SessionProfile {
+class TaxableTurnoverControllerImpl @Inject()(val authConnector: AuthConnector,
+                                              val messagesApi: MessagesApi,
+                                              val vrs: VatRegistrationService,
+                                              val currentProfileService: CurrentProfileService,
+                                              val vatRegFrontendService: VatRegFrontendService,
+                                              val eligibilityService: EligibilityService) extends TaxableTurnoverController
+
+trait TaxableTurnoverController extends VatRegistrationController with SessionProfile {
+  val eligibilityService: EligibilityService
+  val vatRegFrontendService: VatRegFrontendService
 
   val form = TaxableTurnoverForm.form
 
@@ -56,11 +57,11 @@ class TaxableTurnoverController @Inject()(implicit val messagesApi: MessagesApi,
         withCurrentProfile { implicit profile =>
           form.bindFromRequest().fold(
             badForm => Future.successful(BadRequest(views.html.pages.taxable_turnover(badForm))),
-            data => eligibilityService.saveChoiceQuestion(data) map { _ =>
+            data    => eligibilityService.saveChoiceQuestion(data) map { _ =>
               if (data.yesNo == TAXABLE_YES) {
                 Redirect(vatRegFrontendService.buildVatRegFrontendUrlEntry)
               } else {
-                Redirect(controllers.routes.VoluntaryRegistrationController.show.url)
+                Redirect(controllers.routes.VoluntaryRegistrationController.show())
               }
             }
           )

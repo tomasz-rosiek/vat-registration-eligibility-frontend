@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package models.external
+import org.slf4j.{Logger, LoggerFactory}
 
-import play.api.libs.json.Json
-
-trait AuthResponse
-
-case class Authority(ids: String, userDetailsLink: String) extends AuthResponse
-
-object Authority {
-  implicit val format = Json.format[Authority]
-}
-
-case class UserIDs(internalId: String, externalId: String) extends AuthResponse
-
-object UserIDs {
-  implicit val formats = Json.format[UserIDs]
+package object services {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 }

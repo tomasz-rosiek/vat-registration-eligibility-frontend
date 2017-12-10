@@ -16,30 +16,34 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import common.enums.CacheKeys.IneligibilityReason
 import common.enums.{EligibilityQuestions => Questions}
 import connectors.KeystoreConnector
 import forms.ServiceCriteriaFormFactory
-import models.view.YesOrNoQuestion
 import models.CurrentProfile
+import models.view.YesOrNoQuestion
 import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Result}
-import services.{CurrentProfileService, EligibilityService, VatRegistrationService}
+import services.{CurrentProfileService, EligibilityService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
-@Singleton
-class EligibilityController @Inject()(val keystoreConnector: KeystoreConnector,
-                                      val currentProfileService: CurrentProfileService,
-                                      val eligibilityService: EligibilityService,
-                                      implicit val messagesApi: MessagesApi,
-                                      implicit val vrs: VatRegistrationService)
-  extends VatRegistrationController with SessionProfile {
+
+class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
+                                          val currentProfileService: CurrentProfileService,
+                                          val eligibilityService: EligibilityService,
+                                          val messagesApi: MessagesApi,
+                                          val authConnector: AuthConnector) extends EligibilityController
+
+trait EligibilityController extends VatRegistrationController with SessionProfile {
+  val eligibilityService: EligibilityService
+  val keystoreConnector: KeystoreConnector
 
   private def submitQuestion(question: Questions.Value, newValue: Boolean, exitCondition: Boolean)(success: => Result, fail: => Result)
                             (implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[Result] = {
@@ -191,7 +195,7 @@ class EligibilityController @Inject()(val keystoreConnector: KeystoreConnector,
               fail    = Redirect(controllers.routes.EligibilityController.ineligible())
             )
           )
-      }
+        }
   }
 
   def showExemptionCriteria : Action[AnyContent] = authorised.async{
@@ -216,6 +220,8 @@ class EligibilityController @Inject()(val keystoreConnector: KeystoreConnector,
               fail    = Redirect(controllers.routes.EligibilityController.ineligible())
             )
           )
-      }
+        }
   }
 }
+
+

@@ -16,27 +16,26 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import cats.syntax.FlatMapSyntax
 import forms.{ExpectationThresholdForm, OverThresholdFormFactory}
 import models.MonthYearModel.FORMAT_DD_MMMM_Y
 import models.hasIncorpDate
-import models.view.{ExpectationOverThresholdView, OverThresholdView}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import services._
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.SessionProfile
 
 import scala.concurrent.Future
 
-@Singleton
-class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
-                                    implicit val s4LService: S4LService,
-                                    implicit val vrs: VatRegistrationService,
-                                    val currentProfileService: CurrentProfileService,
-                                    val eligibilityService: EligibilityService)
-  extends VatRegistrationController with FlatMapSyntax with SessionProfile {
+class ThresholdControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                        val authConnector: AuthConnector,
+                                        val currentProfileService: CurrentProfileService,
+                                        val eligibilityService: EligibilityService) extends ThresholdController
+
+trait ThresholdController extends VatRegistrationController with SessionProfile {
+  val eligibilityService: EligibilityService
 
   def goneOverShow: Action[AnyContent] = authorised.async {
     implicit user =>
@@ -44,10 +43,9 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
         withCurrentProfile { implicit profile =>
           hasIncorpDate.unapply.flatMap { incorpDate =>
             eligibilityService.getEligibilityChoice map { choice =>
-              Ok(views.html.pages.over_threshold(
-                choice.overThreshold.fold(OverThresholdFormFactory.form(incorpDate))(OverThresholdFormFactory.form(incorpDate).fill),
-                incorpDate.format(FORMAT_DD_MMMM_Y)
-              ))
+              val overThresholdView = choice.overThreshold.fold(OverThresholdFormFactory.form(incorpDate))(OverThresholdFormFactory.form(incorpDate).fill)
+              val incorpDateView    = incorpDate.format(FORMAT_DD_MMMM_Y)
+              Ok(views.html.pages.over_threshold(overThresholdView, incorpDateView))
             }
           }
         }
@@ -60,8 +58,10 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
         withCurrentProfile { implicit profile =>
           hasIncorpDate.unapply.flatMap { incorpDate =>
             OverThresholdFormFactory.form(incorpDate).bindFromRequest().fold(
-              badForm => BadRequest(views.html.pages.over_threshold(badForm, incorpDate.format(FORMAT_DD_MMMM_Y))).pure,
-              data => eligibilityService.saveChoiceQuestion(data) map (_ => Redirect(controllers.routes.ThresholdController.expectationOverShow()))
+              badForm => Future.successful(BadRequest(views.html.pages.over_threshold(badForm, incorpDate.format(FORMAT_DD_MMMM_Y)))),
+              data    => eligibilityService.saveChoiceQuestion(data) map {
+                _ => Redirect(controllers.routes.ThresholdController.expectationOverShow())
+              }
             )
           }
         }
@@ -73,9 +73,9 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
         withCurrentProfile { implicit profile =>
           hasIncorpDate.unapply.flatMap { incorpDate =>
             eligibilityService.getEligibilityChoice map { choice =>
-              Ok(views.html.pages.expectation_over_threshold(
+              val expectedOvertThresholdView =
                 choice.expectationOverThreshold.fold(ExpectationThresholdForm.form(incorpDate))(ExpectationThresholdForm.form(incorpDate).fill)
-              ))
+              Ok(views.html.pages.expectation_over_threshold(expectedOvertThresholdView))
             }
           }
         }
@@ -87,8 +87,10 @@ class ThresholdController @Inject()(implicit val messagesApi: MessagesApi,
         withCurrentProfile { implicit profile =>
           hasIncorpDate.unapply.flatMap { incorpDate =>
             ExpectationThresholdForm.form(incorpDate).bindFromRequest().fold(
-              badForm => BadRequest(views.html.pages.expectation_over_threshold(badForm)).pure,
-              data => eligibilityService.saveChoiceQuestion(data) map (_ => Redirect(controllers.routes.ThresholdSummaryController.show()))
+              badForm => Future.successful(BadRequest(views.html.pages.expectation_over_threshold(badForm))),
+              data => eligibilityService.saveChoiceQuestion(data) map {
+                _ => Redirect(controllers.routes.ThresholdSummaryController.show())
+              }
             )
           }
         }

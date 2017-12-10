@@ -17,24 +17,28 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import common.enums.{CacheKeys, EligibilityQuestions => Questions}
+import connectors.S4LConnector
 import models.api.VatEligibilityChoice.{NECESSITY_OBLIGATORY, NECESSITY_VOLUNTARY}
-import models.api.{VatEligibilityChoice, VatExpectedThresholdPostIncorp, VatScheme, VatServiceEligibility, VatThresholdPostIncorp}
+import models.api._
 import models.view.TaxableTurnover.{TAXABLE_NO, TAXABLE_YES}
 import models.view.VoluntaryRegistration.{REGISTER_NO, REGISTER_YES}
 import models.view.VoluntaryRegistrationReason.{INTENDS_TO_SELL, NEITHER, SELLS}
-import models.view.{EligibilityChoice, ExpectationOverThresholdView, OverThresholdView, TaxableTurnover, VoluntaryRegistration, VoluntaryRegistrationReason}
+import models.view._
 import models.{CurrentProfile, S4LVatEligibility, S4LVatEligibilityChoice}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-@Singleton
-class EligibilityService @Inject()(val s4lService: S4LService,
-                                   val vatRegistrationService: VatRegistrationService) {
+class EligibilityServiceImpl @Inject()(val s4LConnector: S4LConnector,
+                                       val vatRegistrationService: VatRegistrationService) extends EligibilityService
+
+trait EligibilityService {
+  val s4LConnector: S4LConnector
+  val vatRegistrationService: VatRegistrationService
 
   //Eligibility Questions
   private def toEligibilityViewModel(scheme: VatScheme): S4LVatEligibility =
@@ -136,49 +140,49 @@ class EligibilityService @Inject()(val s4lService: S4LService,
   private def viewToApiModel(viewModel: S4LVatEligibilityChoice): Either[S4LVatEligibilityChoice, VatEligibilityChoice] =
     viewModel match {
       case s4l@S4LVatEligibilityChoice(
-        Some(TaxableTurnover(TAXABLE_NO)),
-        Some(VoluntaryRegistration(REGISTER_YES)),
-        Some(VoluntaryRegistrationReason(_)),
-        None,
-        None) => Right(toApi(s4l))
+      Some(TaxableTurnover(TAXABLE_NO)),
+      Some(VoluntaryRegistration(REGISTER_YES)),
+      Some(VoluntaryRegistrationReason(_)),
+      None,
+      None) => Right(toApi(s4l))
       case s4l@S4LVatEligibilityChoice(
-        Some(TaxableTurnover(TAXABLE_YES)),
-        Some(VoluntaryRegistration(REGISTER_NO)),
-        None,
-        None,
-        None) => Right(toApi(s4l))
+      Some(TaxableTurnover(TAXABLE_YES)),
+      Some(VoluntaryRegistration(REGISTER_NO)),
+      None,
+      None,
+      None) => Right(toApi(s4l))
       case s4l@S4LVatEligibilityChoice(
-        None,
-        Some(VoluntaryRegistration(REGISTER_YES)),
-        Some(VoluntaryRegistrationReason(_)),
-        Some(OverThresholdView(false, _)),
-        Some(ExpectationOverThresholdView(false, _))) => Right(toApi(s4l))
+      None,
+      Some(VoluntaryRegistration(REGISTER_YES)),
+      Some(VoluntaryRegistrationReason(_)),
+      Some(OverThresholdView(false, _)),
+      Some(ExpectationOverThresholdView(false, _))) => Right(toApi(s4l))
       case s4l@S4LVatEligibilityChoice(
-        None,
-        Some(VoluntaryRegistration(REGISTER_NO)),
-        None,
-        Some(OverThresholdView(_, _)),
-        Some(ExpectationOverThresholdView(_, _))) => Right(toApi(s4l))
+      None,
+      Some(VoluntaryRegistration(REGISTER_NO)),
+      None,
+      Some(OverThresholdView(_, _)),
+      Some(ExpectationOverThresholdView(_, _))) => Right(toApi(s4l))
       case view => Left(view)
     }
 
   def getEligibility(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[S4LVatEligibility] =
-    s4lService.fetchAndGet[S4LVatEligibility](CacheKeys.Eligibility) flatMap {
+    s4LConnector.fetchAndGet[S4LVatEligibility](currentProfile.registrationId, CacheKeys.Eligibility) flatMap {
       case Some(s4lModel) => Future.successful(s4lModel)
       case None           => for {
         scheme <- vatRegistrationService.getVatScheme
         toSave = toEligibilityViewModel(scheme)
-        _ <- s4lService.save(CacheKeys.Eligibility, toSave)
+        _ <- s4LConnector.save(currentProfile.registrationId, CacheKeys.Eligibility, toSave)
       } yield toSave
     }
 
   def getEligibilityChoice(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[S4LVatEligibilityChoice] =
-    s4lService.fetchAndGet[S4LVatEligibilityChoice](CacheKeys.EligibilityChoice) flatMap {
+    s4LConnector.fetchAndGet[S4LVatEligibilityChoice](currentProfile.registrationId, CacheKeys.EligibilityChoice) flatMap {
       case Some(s4lModel) => Future.successful(s4lModel)
       case None           => for {
         scheme <- vatRegistrationService.getVatScheme
         toSave = toEligibilityChoiceViewModel(scheme, currentProfile.incorporationDate)
-        _      <- s4lService.save(CacheKeys.EligibilityChoice, toSave)
+        _      <- s4LConnector.save(currentProfile.registrationId, CacheKeys.EligibilityChoice, toSave)
       } yield toSave
     }
 
@@ -207,7 +211,7 @@ class EligibilityService @Inject()(val s4lService: S4LService,
         }
         _ <- saveEligibility(toSave)
       } yield newValue
-      case Left(view) => s4lService.save(CacheKeys.Eligibility, view) map (_ => newValue)
+      case Left(view) => s4LConnector.save(currentProfile.registrationId, CacheKeys.Eligibility, view) map (_ => newValue)
     }
 
   private def updateEligibilityChoiceViewModel(viewModel: S4LVatEligibilityChoice): S4LVatEligibilityChoice = viewModel match {
@@ -250,13 +254,13 @@ class EligibilityService @Inject()(val s4lService: S4LService,
         }
         _ <- saveEligibility(toSave)
       } yield newValue
-      case Left(view) => s4lService.save(CacheKeys.EligibilityChoice, view) map (_ => newValue)
+      case Left(view) => s4LConnector.save(currentProfile.registrationId, CacheKeys.EligibilityChoice, view) map (_ => newValue)
     }
 
   private def saveEligibility(newValue: VatServiceEligibility)(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[VatServiceEligibility] = {
     for {
       _ <- vatRegistrationService.submitEligibility(newValue)
-      _ <- s4lService.clear
+      _ <- s4LConnector.clear(currentProfile.registrationId)
     } yield newValue
   }
 }

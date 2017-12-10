@@ -19,11 +19,10 @@ package models.api
 import java.time.LocalDate
 
 import play.api.libs.json.Json
+
 case class VatExpectedThresholdPostIncorp(expectedOverThresholdSelection: Boolean,
                                           expectedOverThresholdDate: Option[LocalDate])
 
 object VatExpectedThresholdPostIncorp {
-
   implicit val format = Json.format[VatExpectedThresholdPostIncorp]
-
 }
