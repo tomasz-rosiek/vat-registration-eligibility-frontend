@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
-import common.enums.{CacheKeys, VatRegStatus, Version1EligibilityResult}
+package common.enums
+
 import org.scalatestplus.play.PlaySpec
-import play.api.libs.json.{JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsString, JsSuccess, Json}
 
 class EnumSpec extends PlaySpec {
 
-"Version1EligibilityResult" should {
-  "Version1EligibilityResultValueToString return a valid String" in {
-    Version1EligibilityResult.Version1EligibilityResultValueToString(Version1EligibilityResult.noNino) mustBe "noNino"
-  }
-  "format to and from json correctly" in {
-    val json = JsString("noNino")
+  "private Version1EligibilityResult" should {
+    "Version1EligibilityResultValueToString return a valid String" in {
+      Version1EligibilityResult.Version1EligibilityResultValueToString(Version1EligibilityResult.noNino) mustBe "noNino"
+    }
+    "format to and from json correctly" in {
+      val json = JsString("noNino")
 
-    Json.toJson(Version1EligibilityResult.format.writes(Version1EligibilityResult.noNino)) mustBe json
-    Version1EligibilityResult.format.reads(Json.toJson("noNino")) mustBe JsSuccess(Version1EligibilityResult.noNino)
+      Json.toJson(Version1EligibilityResult.format.writes(Version1EligibilityResult.noNino)) mustBe json
+      Version1EligibilityResult.format.reads(Json.toJson("noNino")) mustBe JsSuccess(Version1EligibilityResult.noNino)
+    }
   }
-}
+  "EligibilityResult questions" should {
+    "return the correct private Enum based on version number" in {
+      EligibilityResult(1).questions mustBe Version1EligibilityResult
+    }
+  }
 
   "VatRegStatus" should {
     "format to and json correctly" in {
@@ -42,8 +48,6 @@ class EnumSpec extends PlaySpec {
   "CacheKeys" should {
     "cacheKeysValueToString return a valid string" in {
       CacheKeys.cacheKeysValueToString(CacheKeys.CurrentProfile) mustBe "CurrentProfile"
-
-
     }
   }
 

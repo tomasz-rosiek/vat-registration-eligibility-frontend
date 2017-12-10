@@ -17,7 +17,7 @@
 package common.enums
 
 import play.api.libs.json._
-
+@deprecated
 object EligibilityQuestions extends Enumeration {
   val haveNino = Value
   val doingBusinessAbroad = Value
