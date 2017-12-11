@@ -18,7 +18,12 @@ package common.enums
 
 import play.api.libs.json.{Format, Reads, Writes}
 
-object Version1EligibilityResult extends Enumeration {
+case class EligibilityResult(version:Int,questionsMap:Map[Int,result] = Map(1 -> Version1EligibilityResult)){
+  def questions = version match{
+    case 1 => Version1EligibilityResult
+  }
+}
+private[enums] object Version1EligibilityResult extends result {
   val noNino = Value
   val doingInternationalBusiness = Value
   val otherInvolvementsOrCOLE = Value
@@ -32,3 +37,4 @@ object Version1EligibilityResult extends Enumeration {
 
   implicit val format = Format(Reads.enumNameReads(Version1EligibilityResult), Writes.enumNameWrites)
 }
+trait result extends Enumeration
