@@ -38,9 +38,9 @@ class SummaryServiceSpec extends UnitSpec with MockitoSugar with VatMocks with F
     VatRegStatus.draft,Some(LocalDate.of(2016, 12, 21)))
 
   class Setup {
-    val service = new SummaryService(
-      eligibilityService = mockEligibilityService
-    )
+    val service = new SummaryService {
+      override val eligibilityService = mockEligibilityService
+    }
   }
 
   "Calling Eligibility Summary" should {
@@ -51,7 +51,7 @@ class SummaryServiceSpec extends UnitSpec with MockitoSugar with VatMocks with F
       when(mockEligibilityService.toApi(ArgumentMatchers.any[S4LVatEligibility]()))
         .thenReturn(validServiceEligibilityNoChoice)
 
-      val response = await(service.getEligibilitySummary())
+      val response = await(service.getEligibilitySummary)
 
       response.sections.length shouldBe 6
       response.sections(0).id shouldBe "nationalInsurance"

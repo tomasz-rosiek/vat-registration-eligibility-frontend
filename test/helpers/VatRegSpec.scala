@@ -58,7 +58,6 @@ class VatRegSpec extends UnitSpec with WithFakeApplication
   override def beforeEach() {
     reset(mockVatRegistrationService)
     reset(mockS4LConnector)
-    reset(mockS4LService)
     reset(mockKeystoreConnector)
     reset(mockAuthConnector)
     reset(mockSessionCache)

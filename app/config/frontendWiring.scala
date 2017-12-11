@@ -48,7 +48,8 @@ trait WSHttp extends
   HttpDelete with WSDelete with
   Hooks
 
-class WSHttpImpl @Inject()(val auditConnector: AuditConnector, config: ServicesConfig) extends WSHttp {
+class WSHttpImpl @Inject()(config: ServicesConfig) extends WSHttp {
+  override val auditConnector = FrontendAuditConnector
   override val hooks   = NoneRequired
   override val appName = config.getString("appName")
 }

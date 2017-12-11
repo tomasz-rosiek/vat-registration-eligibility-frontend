@@ -22,7 +22,7 @@ import config.WSHttp
 import models.external.BusinessProfile
 import play.api.http.Status.FORBIDDEN
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future

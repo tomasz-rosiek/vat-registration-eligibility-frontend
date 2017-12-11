@@ -32,14 +32,12 @@ import scala.concurrent.Future
 class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
-    val testController = new VoluntaryRegistrationReasonController()(mockMessages,
-      mockS4LService,
-      mockVatRegistrationService,
-      mockCurrentProfileService,
-      mockVatRegFrontendService,
-      mockEligibilityService
-      ) {
+    val testController = new VoluntaryRegistrationReasonController {
       override val authConnector: AuthConnector = mockAuthConnector
+      override val eligibilityService = mockEligibilityService
+      override val vatRegFrontendService = mockVatRegFrontendService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = mockMessages
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -83,7 +81,8 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn(s"someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
+        .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.SELLS
@@ -98,7 +97,8 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistrationReason = Some(reasonIntendsToSell))))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn(s"someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
+        .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.INTENDS_TO_SELL
@@ -113,7 +113,8 @@ class VoluntaryRegistrationReasonControllerSpec extends VatRegSpec with VatRegis
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistrationReason = Some(reasonNeither))))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(ArgumentMatchers.any())).thenReturn(s"someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome)
+        .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationReasonRadio" -> VoluntaryRegistrationReason.NEITHER

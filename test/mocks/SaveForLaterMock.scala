@@ -16,8 +16,7 @@
 
 package mocks
 
-import cats.data.OptionT
-import connectors.{OptionalResponse, S4LConnector}
+import connectors.S4LConnector
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
@@ -33,10 +32,10 @@ trait SaveForLaterMock {
 
   lazy val mockS4LConnector = mock[S4LConnector]
 
-  def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[OptionalResponse[T]] = {
+  def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[Option[T]]] = {
     when(mockS4LConnector.fetchAndGet[T](ArgumentMatchers.anyString(), ArgumentMatchers.contains(formId))
       (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
-      .thenReturn(OptionT(Future.successful(model)))
+      .thenReturn(Future.successful(model))
   }
 
   def mockS4LFetchAll(cacheMap: Option[CacheMap], mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[Option[CacheMap]]] = {

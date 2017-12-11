@@ -37,16 +37,22 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
 
   val expectedError = "Date of Incorporation data expected to be found in Incorporation"
 
-  object TestThresholdController extends ThresholdController() {
+  val testThresholdController = new ThresholdController {
     override val authConnector = mockAuthConnector
+    override val eligibilityService = mockEligibilityService
+    override val messagesApi = mockMessages
+    override val currentProfileService = mockCurrentProfileService
 
     override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
      f(currentProfile)
     }
   }
 
-  object TestThresholdControllerWithoutIncorpDate extends ThresholdController() {
+  val testThresholdControllerWithoutIncorpDate = new ThresholdController {
     override val authConnector = mockAuthConnector
+    override val eligibilityService = mockEligibilityService
+    override val messagesApi = mockMessagesApi
+    override val currentProfileService = mockCurrentProfileService
 
     override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
       f(currentProfile.copy(incorporationDate = None))
@@ -59,7 +65,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     val expectedText = "VAT taxable turnover gone over"
 
     "returnException if no IncorporationInfo Date present" in {
-      val res = intercept[Exception](callAuthorised(TestThresholdControllerWithoutIncorpDate.goneOverShow) {
+      val res = intercept[Exception](callAuthorised(testThresholdControllerWithoutIncorpDate.goneOverShow) {
         a => status(a) shouldBe 500
       }).getMessage
       res shouldBe expectedError
@@ -71,7 +77,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
-      callAuthorised(TestThresholdController.goneOverShow) {
+      callAuthorised(testThresholdController.goneOverShow) {
         _ includesText expectedText
       }
     }
@@ -80,7 +86,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyS4LEligibilityChoice))
 
-      callAuthorised(TestThresholdController.goneOverShow) {
+      callAuthorised(testThresholdController.goneOverShow) {
         _ includesText expectedText
       }
     }
@@ -90,7 +96,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return Exception When Incorporation date is empty" in {
 
       val res = intercept[Exception](submitAuthorised
-      (TestThresholdControllerWithoutIncorpDate.goneOverSubmit, fakeRequest.withFormUrlEncodedBody())
+      (testThresholdControllerWithoutIncorpDate.goneOverSubmit, fakeRequest.withFormUrlEncodedBody())
       (a => status(a) shouldBe 500)).getMessage
       res shouldBe expectedError
     }
@@ -98,7 +104,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return 400 when no data posted" in {
 
       submitAuthorised(
-        TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
+        testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
         status(_) shouldBe Status.BAD_REQUEST
       }
     }
@@ -106,7 +112,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return 400 when partial data is posted" in {
 
       submitAuthorised(
-        TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
+        testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
           "overThresholdRadio" -> "true",
           "overThreshold.month" -> "",
           "overThreshold.year" -> "2017"
@@ -120,7 +126,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
-      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
         "overThreshold.month" -> "6",
         "overThreshold.year" -> "2016"
@@ -134,7 +140,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
-      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "true",
         "overThreshold.month" -> "1",
         "overThreshold.year" -> "2017"
@@ -147,7 +153,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold))
 
-      submitAuthorised(TestThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(testThresholdController.goneOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "overThresholdRadio" -> "false"
       )) {
         _ redirectsTo controllers.routes.ThresholdController.expectationOverShow().url
@@ -162,7 +168,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
-      val res = intercept[Exception](callAuthorised(TestThresholdControllerWithoutIncorpDate.expectationOverShow)
+      val res = intercept[Exception](callAuthorised(testThresholdControllerWithoutIncorpDate.expectationOverShow)
       (a => status(a) shouldBe 500)).getMessage
       res shouldBe expectedError
     }
@@ -172,7 +178,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
-      callAuthorised(TestThresholdController.expectationOverShow()) {
+      callAuthorised(testThresholdController.expectationOverShow()) {
         a =>
           a.map(a => {val res = Jsoup.parse(contentAsString(a))
           res.getElementById("expectationOverThreshold.day").attr("value") shouldBe("30")
@@ -187,7 +193,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return Exception When Incorporation date is empty" in {
 
       val res = intercept[Exception](submitAuthorised
-      (TestThresholdControllerWithoutIncorpDate.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody())
+      (testThresholdControllerWithoutIncorpDate.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody())
       (a => status(a) shouldBe 500)).getMessage
       res shouldBe expectedError
     }
@@ -195,7 +201,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
     "return 400 when no data posted" in {
 
       submitAuthorised(
-        TestThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
+        testThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody()) {
         status(_) shouldBe Status.BAD_REQUEST
       }
     }
@@ -206,7 +212,7 @@ class ThresholdControllerSpec extends VatRegSpec with VatRegistrationFixture wit
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
-      submitAuthorised(TestThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody(
+      submitAuthorised(testThresholdController.expectationOverSubmit(), fakeRequest.withFormUrlEncodedBody(
         "expectationOverThresholdRadio" -> "true",
         "expectationOverThreshold.day" -> "01",
         "expectationOverThreshold.month" -> "01",

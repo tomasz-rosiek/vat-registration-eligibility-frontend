@@ -32,15 +32,12 @@ import scala.concurrent.Future
 class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
-    val testController = new TaxableTurnoverController()(mockMessages,
-      mockS4LService,
-      mockVatRegistrationService,
-      mockCurrentProfileService,
-      mockVatRegFrontendService,
-      mockEligibilityService
-    ){
-
+    val testController = new TaxableTurnoverController {
       override val authConnector: AuthConnector = mockAuthConnector
+      override val eligibilityService = mockEligibilityService
+      override val vatRegFrontendService = mockVatRegFrontendService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = mockMessages
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -86,7 +83,8 @@ class TaxableTurnoverControllerSpec extends VatRegSpec with VatRegistrationFixtu
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithTaxableTurnover))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
+        .thenReturn("someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "taxableTurnoverRadio" -> TaxableTurnover.TAXABLE_YES

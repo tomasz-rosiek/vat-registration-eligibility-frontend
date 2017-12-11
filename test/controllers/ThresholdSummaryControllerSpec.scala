@@ -33,21 +33,17 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
 
   class Setup {
 
-    val testController = new ThresholdSummaryController()(
-      mockMessages,
-      mockS4LService,
-      mockVatRegistrationService,
-      mockCurrentProfileService,
-      mockVatRegFrontendService,
-      mockEligibilityService
-    ) {
+    val testController = new ThresholdSummaryController {
       override val authConnector = mockAuthConnector
+      override val eligibilityService = mockEligibilityService
+      override val vatRegFrontendService = mockVatRegFrontendService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = mockMessages
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
       }
     }
-
   }
 
   val fakeRequest = FakeRequest(controllers.routes.ThresholdSummaryController.show())
@@ -67,10 +63,10 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
         overThreshold = Some(OverThresholdView(false))
       )
 
-      when(mockS4LService.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(eligibilityChoice)))
 
-      testController.getVatThresholdAndExpectedThreshold() returns (validVatThresholdPostIncorp,VatExpectedThresholdPostIncorp(false,None))
+      testController.getVatThresholdAndExpectedThreshold returns (validVatThresholdPostIncorp,VatExpectedThresholdPostIncorp(false,None))
     }
 
     "mapToModels returns a tuple of VatExpectedThreshold and VatThreshold" in new Setup {
@@ -85,10 +81,10 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
         expectationOverThreshold = Some(ExpectationOverThresholdView(false, None))
       )
 
-      when(mockS4LService.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.fetchAndGet[S4LVatEligibilityChoice](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(eligibilityChoice)))
 
-      testController.getThresholdSummary().map(summary => summary.sections.length shouldBe 2)
+      testController.getThresholdSummary.map(summary => summary.sections.length shouldBe 2)
     }
   }
 
@@ -108,7 +104,8 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(overThreshold = Some(overThreshold))))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someEntryUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
+        .thenReturn("someEntryUrl")
 
       callAuthorised(testController.submit) {
         _ redirectsTo s"someEntryUrl"
@@ -121,7 +118,8 @@ class ThresholdSummaryControllerSpec extends VatRegSpec with VatRegistrationFixt
       when(mockEligibilityService.getEligibilityChoice(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithThreshold.copy(expectationOverThreshold = Some(expectation))))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry(ArgumentMatchers.any())).thenReturn("someEntryUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlEntry)
+        .thenReturn("someEntryUrl")
 
       callAuthorised(testController.submit) {
         _ redirectsTo s"someEntryUrl"

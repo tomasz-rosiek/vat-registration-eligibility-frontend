@@ -21,8 +21,7 @@ import helpers.VatRegSpec
 import models.api._
 import models.external.IncorporationInfo
 import play.api.http.Status.{BAD_GATEWAY, FORBIDDEN, NOT_FOUND, OK}
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
+import config.WSHttp
 
 import scala.language.postfixOps
 import uk.gov.hmrc.http.{ HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse }
@@ -59,17 +58,6 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     }
   }
 
-  "Calling deleteVatScheme" should {
-    "return a successful outcome given an existing registration" in new Setup {
-      mockHttpDELETE[HttpResponse]("tst-url", HttpResponse(OK))
-      connector.deleteVatScheme("regId") completedSuccessfully
-    }
-    "return the notFound exception when trying to DELETE non-existent registration" in new Setup {
-      mockHttpFailedDELETE[HttpResponse]("tst-url", notFound)
-      connector.deleteVatScheme("regId") failedWith notFound
-    }
-  }
-
   "Calling upsertVatEligibility" should {
 
     val vatEligibility = validServiceEligibility
@@ -96,12 +84,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
 
     "return a IncorporationInfo when it can be retrieved from the microservice" in new Setup {
       mockHttpGET[IncorporationInfo]("tst-url", testIncorporationInfo)
-      connector.getIncorporationInfo("tstID") returnsSome testIncorporationInfo
+      await(connector.getIncorporationInfo("tstID")) shouldBe Some(testIncorporationInfo)
     }
 
     "fail when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[IncorporationInfo]("test-url", notFound)
-      connector.getIncorporationInfo("tstID") returnsNone
+      await(connector.getIncorporationInfo("tstID")) shouldBe None
     }
   }
 }

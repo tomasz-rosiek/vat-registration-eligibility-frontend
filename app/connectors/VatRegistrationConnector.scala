@@ -51,14 +51,6 @@ trait VatRegistrationConnector {
     }
   }
 
-
-  def deleteVatScheme(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[HttpResponse]): Future[HttpResponse] = {
-    http.DELETE[HttpResponse](s"$vatRegUrl/vatreg/$regId/delete-scheme").recover {
-      case e: Exception => throw logResponse(e, "deleteVatScheme")
-    }
-  }
-
-
   def getIncorporationInfo(transactionId: String)(implicit hc: HeaderCarrier): Future[Option[IncorporationInfo]] = {
     http.GET[IncorporationInfo](s"$vatRegUrl/vatreg/incorporation-information/$transactionId").map(Some(_)).recover {
       case _ => None

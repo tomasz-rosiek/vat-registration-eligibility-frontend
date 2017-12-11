@@ -44,12 +44,12 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
     implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
       VatRegStatus.draft,Some(LocalDate.of(2016, 12, 21)))
 
-    val service = new EligibilityService(
-      s4lService = mockS4LService,
-      vatRegistrationService = mockVatRegistrationService
-    )
+    val service = new EligibilityService {
+      override val s4LConnector = mockS4LConnector
+      override val vatRegistrationService = mockVatRegistrationService
+    }
 
-    when(mockS4LService.fetchAndGet(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+    when(mockS4LConnector.fetchAndGet(ArgumentMatchers.any(), ArgumentMatchers.any())( ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(None))
   }
 
@@ -57,12 +57,12 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
     implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
       VatRegStatus.draft,None)
 
-    val service = new EligibilityService(
-      s4lService = mockS4LService,
-      vatRegistrationService = mockVatRegistrationService
-    )
+    val service = new EligibilityService {
+      override val s4LConnector = mockS4LConnector
+      override val vatRegistrationService = mockVatRegistrationService
+    }
 
-    when(mockS4LService.fetchAndGet(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+    when(mockS4LConnector.fetchAndGet(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(None))
   }
 
@@ -70,8 +70,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
     implicit val currentProfile = CurrentProfile("Test Me", testRegId, "000-434-1",
       VatRegStatus.draft,None)
 
-    val service = new EligibilityService(s4lService = mockS4LService,
-                                         vatRegistrationService = mockVatRegistrationService) {
+    val service = new EligibilityService {
+      override val s4LConnector = mockS4LConnector
+      override val vatRegistrationService = mockVatRegistrationService
+
       override def getEligibility(implicit currentProfile: CurrentProfile, hc: HeaderCarrier): Future[S4LVatEligibility] =
         Future.successful(validS4LEligibility)
 
@@ -103,10 +105,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibilityNoChoice)
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("", Map())))
 
       service.getEligibilityChoice returns S4LVatEligibilityChoice()
@@ -124,10 +126,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibility.copy(vatEligibilityChoice = Some(choice)))
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map())))
 
       val expected = S4LVatEligibilityChoice(
@@ -153,10 +155,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibility.copy(vatEligibilityChoice = Some(choice)))
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map())))
 
       val expected = S4LVatEligibilityChoice(
@@ -180,10 +182,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibility.copy(vatEligibilityChoice = Some(choice)))
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map())))
 
       val expected = S4LVatEligibilityChoice(
@@ -207,10 +209,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibility.copy(vatEligibilityChoice = Some(choice)))
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map())))
 
       val expected = S4LVatEligibilityChoice(
@@ -237,10 +239,10 @@ class EligibilityServiceSpec extends UnitSpec with MockitoSugar with VatMocks wi
         vatServiceEligibility = Some(validServiceEligibility.copy(vatEligibilityChoice = Some(choice)))
       )
 
-      when(mockVatRegistrationService.getVatScheme()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockVatRegistrationService.getVatScheme(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(vatScheme))
 
-      when(mockS4LService.save(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LConnector.save(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map())))
 
       val expected = S4LVatEligibilityChoice(

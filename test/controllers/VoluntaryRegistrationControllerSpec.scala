@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2017 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package controllers
 
 import fixtures.{S4LFixture, VatRegistrationFixture}
@@ -48,14 +32,12 @@ import scala.concurrent.Future
 class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
-    val testController = new VoluntaryRegistrationController()(mockMessages,
-      mockS4LService,
-      mockCurrentProfileService,
-      mockVatRegistrationService,
-      mockVatRegFrontendService,
-      mockEligibilityService
-    ) {
+    val testController = new VoluntaryRegistrationController {
       override val authConnector: AuthConnector = mockAuthConnector
+      override val eligibilityService = mockEligibilityService
+      override val vatRegFrontendService = mockVatRegFrontendService
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = mockMessages
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -115,7 +97,8 @@ class VoluntaryRegistrationControllerSpec extends VatRegSpec with VatRegistratio
       when(mockEligibilityService.saveChoiceQuestion(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validS4LEligibilityChoiceWithVoluntarilyData.copy(voluntaryRegistration = Some(registerNO))))
 
-      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome(ArgumentMatchers.any())).thenReturn(s"someUrl")
+      when(mockVatRegFrontendService.buildVatRegFrontendUrlWelcome)
+        .thenReturn(s"someUrl")
 
       submitAuthorised(testController.submit(), fakeRequest.withFormUrlEncodedBody(
         "voluntaryRegistrationRadio" -> VoluntaryRegistration.REGISTER_NO

@@ -36,12 +36,12 @@ import scala.concurrent.Future
 class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture with S4LFixture {
 
   class Setup {
-    val testController = new EligibilityController(mockKeystoreConnector,
-      mockCurrentProfileService,
-      mockEligibilityService,
-      mockMessages,
-      mockVatRegistrationService) {
+    val testController = new EligibilityController {
       override val authConnector: AuthConnector = mockAuthConnector
+      override val eligibilityService = mockEligibilityService
+      override val keystoreConnector = mockKeystoreConnector
+      override val currentProfileService = mockCurrentProfileService
+      override val messagesApi = mockMessages
 
       override def withCurrentProfile(f: (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(currentProfile)
@@ -55,7 +55,7 @@ class EligibilityControllerSpec extends VatRegSpec with VatRegistrationFixture w
         .thenReturn(Future.successful(validS4LEligibility))
 
       val expectedTitle = "Will the company apply for a VAT registration exception or exemption?"
-      callAuthorised(testController.showExemptionCriteria())(_ includesText expectedTitle)
+      callAuthorised(testController.showExemptionCriteria())(a => a includesText expectedTitle)
     }
   }
 
