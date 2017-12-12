@@ -52,14 +52,36 @@ object S4LEligibilityQuestions {
         model.exceptionOrExemption.isDefined && model.racehorsesOrLandAndProperty.isDefined
   )
 
-  val isValid: Reads[S4LEligibilityQuestions] = baseReads.filter(ValidationError("Not valid"))(model =>
-    model.hasNino.contains(true) && model.internationalBusiness.contains(false) &&
-      model.moreThanOneBusinessOrLegalStatus.contains(false) && model.agriculturalFRSOrAnnualAccount.contains(false) &&
-        model.exceptionOrExemption.contains(false) && model.racehorsesOrLandAndProperty.contains(false)
-  )
+  val isValidReads: Reads[S4LEligibilityQuestions] = (
+    (__ \ "hasNino").read[Option[Boolean]](validateOptionBoolean(true)) and
+    (__ \ "internationalBusiness").read[Option[Boolean]](validateOptionBoolean(false)) and
+    (__ \ "moreThanOneBusinessOrLegalStatus").read[Option[Boolean]](validateOptionBoolean(false)) and
+    (__ \ "agriculturalFRSOrAnnualAccount").read[Option[Boolean]](validateOptionBoolean(false)) and
+    (__ \ "exceptionOrExemption").read[Option[Boolean]](validateOptionBoolean(false)) and
+    (__ \ "racehorsesOrLandAndProperty").read[Option[Boolean]](validateOptionBoolean(false))
+  )(S4LEligibilityQuestions.apply _)
 
   implicit val format: Format[S4LEligibilityQuestions] = Format(baseReads, writes)
 
+  private def validateOptionBoolean(validCase: Boolean): Reads[Option[Boolean]] = new Reads[Option[Boolean]] {
+    override def reads(json: JsValue): JsResult[Option[Boolean]] = {
+      json.asOpt[Boolean].fold[JsResult[Option[Boolean]]](JsError(ValidationError("boolean is None")))(x =>
+        if(x == validCase) JsSuccess(json.asOpt[Boolean]) else JsError(ValidationError(s"is not $validCase"))
+      )
+    }
+  }
+
   def isFull(json: JsValue): Boolean  = json.validate(isFullReads).isSuccess
-  def isValid(json: JsValue): Boolean = json.validate(isValid).isSuccess
+
+  def isValid(json: JsValue): String = {
+    json.validate(isValidReads).fold(
+      errors  => getFirstFailingQuestion(errors.map(q => q._1.toString.replace("/", "")).toList),
+      success => "success"
+    )
+  }
+
+  private def getFirstFailingQuestion(errorList: List[String], index: Int = 0): String = {
+    val ordered = List("hasNino", "internationalBusiness", "moreThanOneBusinessOrLegalStatus", "agriculturalFRSOrAnnualAccount", "exceptionOrExemption", "racehorsesOrLandAndProperty")
+    ordered.filter(x => errorList.contains(x)).head
+  }
 }

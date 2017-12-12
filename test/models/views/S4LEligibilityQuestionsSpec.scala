@@ -169,24 +169,24 @@ class S4LEligibilityQuestionsSpec extends UnitSpec {
     "return true" when {
       "json hasNino as true and everything else false" in {
         val result = S4LEligibilityQuestions.isValid(testJsonFullVALID)
-        result shouldBe true
+        result shouldBe "success"
       }
     }
 
     "return false" when {
       "json hasNino as false and everything else true" in {
         val result = S4LEligibilityQuestions.isValid(testJsonFullNOTVALID)
-        result shouldBe false
+        result shouldBe "hasNino"
       }
 
       "the json is partially full" in {
         val result = S4LEligibilityQuestions.isValid(testJsonNotFull)
-        result shouldBe false
+        result shouldBe "moreThanOneBusinessOrLegalStatus"
       }
 
       "the json is empty" in {
         val result = S4LEligibilityQuestions.isValid(testJsonEmpty)
-        result shouldBe false
+        result shouldBe "hasNino"
       }
     }
   }
