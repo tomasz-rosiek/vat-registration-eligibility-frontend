@@ -41,6 +41,7 @@ trait VatRegistrationService extends FutureInstances {
   val vatRegConnector: VatRegistrationConnector
   val keystoreConnector: KeystoreConnector
 
+  @Deprecated
   def getVatScheme(implicit profile: CurrentProfile, hc: HeaderCarrier): Future[VatScheme] = {
     vatRegConnector.getRegistration(profile.registrationId)
   }

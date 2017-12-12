@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package common.enums
+package transformers
 
-import play.api.libs.json._
+object ToAPI {
 
-@deprecated
-object EligibilityQuestions extends Enumeration {
-  val haveNino = Value
-  val doingBusinessAbroad = Value
-  val doAnyApplyToYou = Value
-  val applyingForAnyOf = Value
-  val applyingForVatExemption = Value
-  val companyWillDoAnyOf = Value
-
-  implicit def eligibilityQuestionValueToString(value: EligibilityQuestions.Value): String = value.toString
-
-  implicit val format = Format(Reads.enumNameReads(EligibilityQuestions), Writes.enumNameWrites)
 }
