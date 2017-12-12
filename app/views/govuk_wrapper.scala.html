@@ -86,7 +86,10 @@
 
 @serviceInfo = {
     @uiLayouts.serviceInfo(
-      betaBanner = phaseBanner("BETA", appConfig.vatRegFrontendFeedbackUrl),
+        betaBanner = uiLayouts.betaBanner(userLoggedIn = false,
+        betaFeedbackUrl = appConfig.feedbackUrl,
+        betaFeedbackUnauthenticatedUrl = appConfig.feedbackUrl,
+        backUrl = Some(appConfig.vatRegFrontendWelcomeUrl)),
       includeGridWrapper = false,
       serviceInfoContent = Some(serviceInfoContent))
 }

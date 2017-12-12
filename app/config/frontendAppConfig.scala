@@ -28,8 +28,10 @@ trait AppConfig {
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
   val timeoutInSeconds: String
-  val vatRegFrontendFeedbackUrl: String
+  val feedbackUrl: String
+  val vatRegFrontendWelcomeUrl: String
   val contactFrontendPartialBaseUrl: String
+  val contactFrontendExternalBaseUrl: String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -39,6 +41,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactFormServiceIdentifier = "SCRS"
 
   override lazy val contactFrontendPartialBaseUrl = loadConfig("microservice.services.contact-frontend.url")
+  override lazy val contactFrontendExternalBaseUrl = loadConfig("microservice.services.contact-frontend-external.url")
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
@@ -46,7 +49,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemNonJSUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val vatRegFrontendWelcomeUrl: String = loadConfig("microservice.services.vat-registration-frontend.www.url")
-  override lazy val vatRegFrontendFeedbackUrl: String = s"${loadConfig("microservice.services.vat-registration-frontend.www.url")}/feedback"
+  override lazy val feedbackUrl: String = s"${contactFrontendExternalBaseUrl}/contact/beta-feedback-unauthenticated"
 
   override val timeoutInSeconds = loadConfig("timeoutInSeconds")
 
