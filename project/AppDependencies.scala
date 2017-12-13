@@ -20,7 +20,6 @@ object MainDependencies {
 
   def apply() = Seq(
     "uk.gov.hmrc"   %% "frontend-bootstrap"             % frontendBootstrapVersion,
-    "uk.gov.hmrc"   %% "play-ui"                        % "7.10.0-2-g1dd19c8",
     "uk.gov.hmrc"   %% "play-partials"                  % playPartialsVersion,
     "uk.gov.hmrc"   %% "http-caching-client"            % httpCachingVersion,
     "uk.gov.hmrc"   %% "play-whitelist-filter"          % playWhitelistVersion,

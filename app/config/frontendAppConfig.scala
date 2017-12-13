@@ -16,6 +16,7 @@
 
 package config
 
+import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.Base64
 
@@ -28,7 +29,7 @@ trait AppConfig {
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
   val timeoutInSeconds: String
-  val feedbackUrl: String
+  def feedbackUrl: String
   val vatRegFrontendWelcomeUrl: String
   val contactFrontendPartialBaseUrl: String
   val contactFrontendExternalBaseUrl: String
@@ -49,7 +50,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemNonJSUrl = s"$contactFrontendPartialBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   lazy val vatRegFrontendWelcomeUrl: String = loadConfig("microservice.services.vat-registration-frontend.www.url")
-  override lazy val feedbackUrl: String = s"${contactFrontendExternalBaseUrl}/contact/beta-feedback-unauthenticated"
+
+  lazy val feedbackUrl =
+    s"${contactFrontendExternalBaseUrl}/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier&backUrl=${URLEncoder.encode(vatRegFrontendWelcomeUrl, "UTF-8")}"
 
   override val timeoutInSeconds = loadConfig("timeoutInSeconds")
 
